@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NexaCred | Simulá tu préstamo y solicitalo online</title>
+  <meta name="description" content="Simulá tu préstamo, conocé la cuota y el costo financiero total, y solicitalo online. La aprobación final se completa en nuestra sucursal.">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232f6fd1'/%3E%3Ctext x='32' y='43' font-size='28' font-family='Arial, sans-serif' font-weight='700' fill='%23ffffff' text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E">
+
+  <!-- Bootstrap 5 (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome (CDN) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <!-- Google Fonts: Space Grotesk (títulos) + Inter (texto) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* =========================================================
+       1. TOKENS — tema claro, misma identidad que el sistema
+       ========================================================= */
+    :root{
+      --bg:#ffffff;
+      --bg-soft:#f4f7fb;
+      --border:#e3e8f0;
+      --text-hi:#161f2e;
+      --text-mid:#4a5568;
+      --text-low:#667085;           /* 5:1 sobre blanco */
+      --blue:#2f6fd1;
+      --blue-dark:#1f4f9e;
+      --cyan:#00b8d9;
+      --grad-deco: linear-gradient(135deg, var(--cyan), var(--blue));   /* solo decorativo */
+      --grad-btn: linear-gradient(135deg, #1f78c8, #2f6fd1);            /* texto blanco con contraste AA */
+      --success:#178a4c; --success-bg:#e7f7ee;
+      --warning:#b7791f; --warning-bg:#fff6e0;
+      --danger:#c53030;  --danger-bg:#fdeaea;
+      --radius-lg:18px; --radius-md:12px;
+      --ease:cubic-bezier(.22,.61,.36,1);
+    }
+    *{ box-sizing:border-box; }
+    html{ scroll-behavior:smooth; scroll-padding-top:84px; }
+    body{ background:var(--bg); color:var(--text-mid); font-family:'Inter',sans-serif; font-size:1rem; line-height:1.65; overflow-x:hidden; }
+    h1,h2,h3,h4{ font-family:'Space Grotesk',sans-serif; color:var(--text-hi); letter-spacing:-0.015em; line-height:1.15; margin:0; }
+    a{ text-decoration:none; }
+    ::selection{ background:#cfe6ff; }
+    :focus-visible{ outline:3px solid rgba(47,111,209,.55); outline-offset:2px; border-radius:6px; }
+    .num{ font-variant-numeric:tabular-nums; }
+    .container-xl{ max-width:1180px; }
+    section.block{ padding:5.5rem 0; }
+    section.block.soft{ background:var(--bg-soft); }
+    @media (max-width:767px){ section.block{ padding:3.6rem 0; } }
+    .section-title{ font-size:clamp(1.65rem, 3vw, 2.3rem); font-weight:600; margin-bottom:.9rem; }
+    .section-lead{ max-width:620px; font-size:1.05rem; color:var(--text-mid); }
+
+    .skip-link{ position:absolute; left:-9999px; top:0; background:var(--blue-dark); color:#fff; padding:.6rem 1rem; z-index:3000; border-radius:0 0 8px 0; }
+    .skip-link:focus{ left:0; }
+    .visually-hidden-live{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+
+    /* ---- botones ---- */
+    .btn-nx{ background:var(--grad-btn); color:#fff; border:none; padding:.8rem 1.5rem; border-radius:12px; font-weight:600; font-size:.95rem; transition:transform .25s var(--ease), box-shadow .25s var(--ease); box-shadow:0 8px 20px -8px rgba(47,111,209,.55); display:inline-flex; align-items:center; justify-content:center; gap:.5rem; }
+    .btn-nx:hover{ transform:translateY(-2px); box-shadow:0 12px 26px -8px rgba(47,111,209,.6); color:#fff; }
+    .btn-nx:disabled{ opacity:.45; cursor:not-allowed; transform:none; box-shadow:none; }
+    .btn-nx-outline{ background:#fff; color:var(--blue-dark); border:1.5px solid #cfdbef; padding:.75rem 1.4rem; border-radius:12px; font-weight:600; font-size:.92rem; transition:border-color .25s, background .25s; display:inline-flex; align-items:center; justify-content:center; gap:.5rem; }
+    .btn-nx-outline:hover{ border-color:var(--blue); background:#f3f8ff; color:var(--blue-dark); }
+    .btn-link-nx{ background:none; border:none; color:var(--blue-dark); font-weight:600; font-size:.88rem; padding:0; }
+    .btn-link-nx:hover{ text-decoration:underline; }
+
+    .form-control, .form-select{ border-radius:10px; border-color:#d3dbe8; font-size:.93rem; padding:.62rem .85rem; }
+    .form-control:focus, .form-select:focus{ border-color:var(--blue); box-shadow:0 0 0 .22rem rgba(47,111,209,.16); }
+    .form-label{ font-size:.84rem; font-weight:600; color:var(--text-hi); margin-bottom:.35rem; }
+    .invalid-feedback{ font-size:.8rem; }
+
+    /* =========================================================
+       2. NAVBAR
+       ========================================================= */
+    .site-nav{ position:sticky; top:0; z-index:1030; background:rgba(255,255,255,.92); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-bottom:1px solid var(--border); padding:.75rem 0; }
+    .brand{ display:inline-flex; align-items:center; gap:.6rem; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.2rem; color:var(--text-hi); }
+    .brand-icon{ width:36px; height:36px; border-radius:10px; display:grid; place-items:center; background:var(--grad-btn); color:#fff; font-size:.95rem; flex-shrink:0; }
+    .brand .accent{ color:var(--blue); }
+    .site-nav .nav-link-nx{ color:var(--text-mid); font-weight:500; font-size:.92rem; padding:.4rem .8rem; border-radius:8px; transition:color .2s, background .2s; display:inline-block; }
+    .site-nav .nav-link-nx:hover{ color:var(--blue-dark); background:#eef4fd; }
+    .navbar-toggler{ border:1px solid var(--border); color:var(--text-hi); padding:.4rem .65rem; }
+    .navbar-toggler:focus{ box-shadow:none; }
+
+    /* =========================================================
+       3. HERO + SIMULADOR (el elemento protagonista)
+       ========================================================= */
+    .hero{ padding:4.2rem 0 5rem; background:
+        radial-gradient(ellipse 70% 60% at 85% 0%, rgba(0,184,217,.13), transparent 65%),
+        radial-gradient(ellipse 60% 55% at 0% 100%, rgba(47,111,209,.09), transparent 65%),
+        #fff; }
+    .hero h1{ font-size:clamp(2.15rem, 4.3vw, 3.2rem); font-weight:700; margin-bottom:1.1rem; max-width:560px; }
+    .hero .lead-copy{ font-size:1.1rem; max-width:500px; margin-bottom:1.8rem; }
+    .hero-points{ list-style:none; margin:0; padding:0; display:grid; gap:.7rem; }
+    .hero-points li{ display:flex; gap:.75rem; align-items:flex-start; font-size:.97rem; color:var(--text-hi); }
+    .hero-points i{ width:26px; height:26px; border-radius:50%; background:#e3f2fb; color:var(--blue); display:grid; place-items:center; font-size:.72rem; flex-shrink:0; margin-top:.05rem; }
+
+    .sim-card{ background:#fff; border:1px solid var(--border); border-radius:22px; padding:1.9rem 1.8rem 1.5rem; box-shadow:0 30px 60px -30px rgba(31,79,158,.35), 0 2px 6px rgba(16,24,40,.05); position:relative; }
+    .sim-card::before{ content:""; position:absolute; left:28px; right:28px; top:0; height:4px; border-radius:0 0 6px 6px; background:var(--grad-deco); }
+    .sim-card h2{ font-size:1.3rem; margin-bottom:1.4rem; }
+    .sim-label{ font-size:.86rem; font-weight:600; color:var(--text-hi); display:block; margin-bottom:.5rem; }
+    .money-box{ display:flex; align-items:center; border:1.5px solid #d3dbe8; border-radius:14px; padding:.35rem .9rem; transition:border-color .2s, box-shadow .2s; background:#fff; }
+    .money-box:focus-within{ border-color:var(--blue); box-shadow:0 0 0 .22rem rgba(47,111,209,.16); }
+    .money-box span{ font-family:'Space Grotesk',sans-serif; font-size:1.5rem; font-weight:600; color:var(--text-low); margin-right:.5rem; }
+    .money-box input{ border:none; outline:none; width:100%; font-family:'Space Grotesk',sans-serif; font-size:1.9rem; font-weight:700; color:var(--text-hi); background:transparent; padding:.2rem 0; }
+    .range-wrap{ padding:.95rem .2rem .2rem; }
+    .range{ -webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:999px; outline:none; cursor:pointer; background:linear-gradient(90deg, var(--blue) var(--pct,0%), #dbe3ef var(--pct,0%)); }
+    .range::-webkit-slider-runnable-track{ background:transparent; height:6px; }
+    .range::-moz-range-track{ background:transparent; height:6px; }
+    .range::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; width:26px; height:26px; margin-top:-10px; border-radius:50%; background:#fff; border:3px solid var(--blue); box-shadow:0 3px 10px rgba(47,111,209,.4); transition:transform .15s var(--ease); }
+    .range::-moz-range-thumb{ width:20px; height:20px; border-radius:50%; background:#fff; border:3px solid var(--blue); box-shadow:0 3px 10px rgba(47,111,209,.4); }
+    .range:active::-webkit-slider-thumb{ transform:scale(1.14); }
+    .range-scale{ display:flex; justify-content:space-between; font-size:.76rem; color:var(--text-low); margin-top:.55rem; }
+    .money-hint{ font-size:.78rem; color:var(--danger); min-height:1.1rem; margin-top:.35rem; }
+
+    .plazo-group{ display:grid; grid-template-columns:repeat(3,1fr); gap:.5rem; margin-bottom:1.4rem; }
+    @media (min-width:576px){ .plazo-group{ grid-template-columns:repeat(6,1fr); } }
+    .plazo-chip{ position:relative; }
+    .plazo-chip input{ position:absolute; opacity:0; inset:0; width:100%; height:100%; cursor:pointer; margin:0; }
+    .plazo-chip label{ display:block; text-align:center; padding:.65rem .2rem; border:1.5px solid #d3dbe8; border-radius:12px; font-weight:600; color:var(--text-hi); font-size:.95rem; line-height:1.15; transition:all .2s var(--ease); background:#fff; }
+    .plazo-chip label small{ display:block; font-weight:500; font-size:.68rem; color:var(--text-low); }
+    .plazo-chip input:checked + label{ background:var(--blue); border-color:var(--blue); color:#fff; box-shadow:0 8px 16px -8px rgba(47,111,209,.7); }
+    .plazo-chip input:checked + label small{ color:#dce9fb; }
+    .plazo-chip input:focus-visible + label{ outline:3px solid rgba(47,111,209,.5); outline-offset:2px; }
+    .plazo-chip input:not(:checked):hover + label{ border-color:var(--blue); }
+
+    .result{ background:linear-gradient(160deg, #f1f7ff, #eaf6fb); border:1px solid #d6e6f6; border-radius:16px; padding:1.3rem 1.3rem 1.1rem; }
+    .result-main-label{ font-size:.86rem; color:var(--text-mid); font-weight:500; }
+    .result-main{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(2.1rem, 5vw, 2.7rem); color:var(--text-hi); line-height:1.1; letter-spacing:-0.02em; }
+    .result-main small{ font-size:1rem; font-weight:500; color:var(--text-low); letter-spacing:0; }
+    .result-grid{ display:grid; grid-template-columns:1fr 1fr; gap:.9rem 1.2rem; margin-top:1.1rem; padding-top:1.05rem; border-top:1px solid #d6e6f6; }
+    .result-grid dt{ font-size:.76rem; font-weight:500; color:var(--text-low); }
+    .result-grid dd{ margin:0; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:1.06rem; color:var(--text-hi); }
+    .sim-actions{ margin-top:1.15rem; display:grid; gap:.6rem; }
+    .sim-legal{ font-size:.74rem; color:var(--text-low); margin:1rem 0 0; line-height:1.5; }
+    .schedule-wrap{ max-height:260px; overflow:auto; border:1px solid var(--border); border-radius:12px; margin-top:.8rem; }
+    .schedule{ width:100%; font-size:.78rem; border-collapse:collapse; min-width:440px; }
+    .schedule th{ position:sticky; top:0; background:#f4f7fb; text-align:right; padding:.5rem .65rem; color:var(--text-low); font-weight:600; }
+    .schedule td{ padding:.45rem .65rem; text-align:right; border-top:1px solid var(--border); color:var(--text-mid); }
+    .schedule th:first-child, .schedule td:first-child{ text-align:center; }
+
+    /* =========================================================
+       4. NOSOTROS
+       ========================================================= */
+    .about-text p{ font-size:1.04rem; max-width:560px; }
+    .principles{ list-style:none; padding:0; margin:2rem 0 0; display:grid; gap:1.1rem; max-width:560px; }
+    .principles li{ display:flex; gap:1rem; }
+    .principles .ico{ width:42px; height:42px; border-radius:12px; background:#e3f2fb; color:var(--blue); display:grid; place-items:center; flex-shrink:0; }
+    .principles h3{ font-size:1rem; margin-bottom:.15rem; }
+    .principles p{ margin:0; font-size:.93rem; }
+
+    .about-side{ background:#fff; border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.8rem; }
+    .about-side h3{ font-size:1.05rem; margin-bottom:1rem; }
+    .use-list{ list-style:none; margin:0 0 1.6rem; padding:0; }
+    .use-list li{ display:flex; justify-content:space-between; gap:1rem; padding:.7rem 0; border-bottom:1px solid var(--border); font-size:.95rem; }
+    .use-list li:last-child{ border-bottom:none; }
+    .use-list strong{ color:var(--text-hi); font-weight:600; }
+    .use-list span{ color:var(--text-low); font-size:.86rem; text-align:right; }
+    .branch-box{ background:var(--bg-soft); border-radius:14px; padding:1.1rem 1.2rem; font-size:.92rem; }
+    .branch-box h4{ font-size:.98rem; margin-bottom:.55rem; }
+    .branch-box p{ margin:0 0 .35rem; display:flex; gap:.65rem; align-items:flex-start; }
+    .branch-box i{ color:var(--blue); margin-top:.28rem; width:16px; text-align:center; flex-shrink:0; }
+
+    /* =========================================================
+       5. CÓMO FUNCIONA (secuencia real → numeración justificada)
+       ========================================================= */
+    .flow{ list-style:none; padding:0; margin:3rem 0 0; display:grid; gap:1.6rem; grid-template-columns:repeat(4,1fr); position:relative; counter-reset:step; }
+    @media (min-width:992px){
+      .flow::before{ content:""; position:absolute; top:22px; left:11%; right:11%; height:2px; background:linear-gradient(90deg,#b8d6f3,#9fc3ee); z-index:0; }
+    }
+    @media (max-width:991px){ .flow{ grid-template-columns:1fr 1fr; } }
+    @media (max-width:575px){ .flow{ grid-template-columns:1fr; } }
+    .flow li{ position:relative; z-index:1; }
+    .flow .step-dot{ width:46px; height:46px; border-radius:50%; background:#fff; border:2px solid var(--blue); color:var(--blue-dark); font-family:'Space Grotesk',sans-serif; font-weight:700; display:grid; place-items:center; margin-bottom:1rem; }
+    .flow li.in-branch .step-dot{ background:var(--blue); color:#fff; }
+    .flow h3{ font-size:1.05rem; margin-bottom:.4rem; }
+    .flow p{ font-size:.92rem; margin:0; }
+    .flow .where{ display:inline-flex; gap:.4rem; align-items:center; font-size:.76rem; font-weight:600; color:var(--blue-dark); background:#e3f2fb; padding:.18rem .6rem; border-radius:999px; margin-bottom:.55rem; }
+    .flow-note{ margin-top:2.4rem; display:flex; gap:.8rem; align-items:flex-start; background:#fff; border:1px solid #cfe3f6; border-left:4px solid var(--blue); border-radius:12px; padding:1rem 1.2rem; font-size:.94rem; color:var(--text-hi); max-width:760px; }
+    .flow-note i{ color:var(--blue); margin-top:.25rem; }
+
+    /* =========================================================
+       6. REQUISITOS
+       ========================================================= */
+    .req-col h3{ font-size:1.1rem; margin-bottom:1rem; }
+    .req-list{ list-style:none; margin:0; padding:0; }
+    .req-list li{ display:flex; gap:.85rem; padding:.85rem 0; border-bottom:1px solid var(--border); }
+    .req-list li:last-child{ border-bottom:none; }
+    .req-list i{ color:var(--blue); margin-top:.3rem; width:18px; text-align:center; flex-shrink:0; }
+    .req-list strong{ color:var(--text-hi); font-weight:600; display:block; }
+    .req-list span{ font-size:.9rem; color:var(--text-mid); }
+
+    /* =========================================================
+       7. SOLICITUD
+       ========================================================= */
+    .request-shell{ background:#fff; border:1px solid var(--border); border-radius:22px; box-shadow:0 24px 50px -32px rgba(31,79,158,.35); overflow:hidden; }
+    .request-aside{ background:linear-gradient(165deg, #1f4f9e, #2f6fd1 60%, #1d8fb5); color:#e6f0fd; padding:2.4rem 2rem; height:100%; }
+    .request-aside h2{ color:#fff; font-size:1.55rem; margin-bottom:.8rem; }
+    .request-aside p{ color:#d6e6fb; font-size:.95rem; }
+    .request-aside ul{ list-style:none; margin:1.6rem 0 0; padding:0; display:grid; gap:.9rem; }
+    .request-aside li{ display:flex; gap:.7rem; font-size:.92rem; color:#fff; }
+    .request-aside li i{ margin-top:.3rem; color:#9ee7f7; }
+    .request-main{ padding:2.2rem 2.2rem 2rem; }
+    @media (max-width:575px){ .request-main{ padding:1.6rem 1.2rem; } .request-aside{ padding:1.8rem 1.4rem; } }
+
+    .stepper{ display:flex; align-items:center; gap:.5rem; margin-bottom:.55rem; }
+    .stepper .s{ width:32px; height:32px; border-radius:50%; display:grid; place-items:center; font-weight:700; font-size:.82rem; font-family:'Space Grotesk',sans-serif; background:#e9eef6; color:var(--text-low); flex-shrink:0; transition:all .3s var(--ease); }
+    .stepper .s.done{ background:var(--blue); color:#fff; }
+    .stepper .s.active{ background:#fff; border:2px solid var(--blue); color:var(--blue-dark); }
+    .stepper .l{ flex:1; height:2px; background:#e9eef6; transition:background .3s; }
+    .stepper .l.done{ background:var(--blue); }
+    .stepper-names{ display:flex; justify-content:space-between; font-size:.74rem; color:var(--text-low); margin-bottom:1.7rem; }
+    .stepper-names span.on{ color:var(--blue-dark); font-weight:600; }
+
+    .step-title{ font-size:1.25rem; margin-bottom:.35rem; }
+    .step-sub{ font-size:.92rem; margin-bottom:1.4rem; }
+    .loan-summary{ border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-bottom:1.2rem; }
+    .loan-summary .row-s{ display:flex; justify-content:space-between; gap:1rem; padding:.7rem 1rem; font-size:.92rem; border-bottom:1px solid var(--border); background:#fff; }
+    .loan-summary .row-s:last-child{ border-bottom:none; }
+    .loan-summary .row-s span:first-child{ color:var(--text-low); }
+    .loan-summary .row-s span:last-child{ color:var(--text-hi); font-weight:600; text-align:right; }
+    .loan-summary .row-s.hl{ background:#f1f7ff; }
+    .step-actions{ display:flex; justify-content:space-between; align-items:center; gap:.8rem; margin-top:1.6rem; flex-wrap:wrap; }
+
+    .doc-row{ display:flex; align-items:center; gap:.9rem; border:1.5px dashed #c5d2e4; border-radius:14px; padding:.9rem 1rem; margin-bottom:.8rem; background:#fbfcfe; transition:all .2s; }
+    .doc-row.ok{ border-style:solid; border-color:#bde5cf; background:var(--success-bg); }
+    .doc-row.bad{ border-color:#f0b9b9; background:var(--danger-bg); }
+    .doc-ico{ width:40px; height:40px; border-radius:11px; background:#e3f2fb; color:var(--blue); display:grid; place-items:center; flex-shrink:0; }
+    .doc-row.ok .doc-ico{ background:#cdeedc; color:var(--success); }
+    .doc-info{ flex:1; min-width:0; }
+    .doc-info strong{ display:block; font-size:.92rem; color:var(--text-hi); font-weight:600; }
+    .doc-info small{ display:block; color:var(--text-low); font-size:.78rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .doc-row.bad .doc-info small{ color:var(--danger); white-space:normal; }
+    .doc-btn{ cursor:pointer; margin:0; }
+    .doc-btn.btn-nx-outline{ padding:.45rem .95rem; font-size:.82rem; border-radius:10px; }
+    .doc-file{ position:absolute; width:1px; height:1px; opacity:0; }
+    .doc-file:focus-visible + .doc-btn{ outline:3px solid rgba(47,111,209,.5); outline-offset:2px; }
+
+    .ratio-note{ border-radius:12px; padding:.8rem 1rem; font-size:.88rem; display:flex; gap:.7rem; align-items:flex-start; margin-bottom:1.2rem; }
+    .ratio-note.good{ background:var(--success-bg); color:#0f5f33; }
+    .ratio-note.warn{ background:var(--warning-bg); color:#7a5212; }
+    .ratio-note i{ margin-top:.25rem; }
+    .form-check-input:checked{ background-color:var(--blue); border-color:var(--blue); }
+
+    .success{ display:none; text-align:left; }
+    .success .check{ width:62px; height:62px; border-radius:50%; background:var(--success-bg); color:var(--success); display:grid; place-items:center; font-size:1.7rem; margin-bottom:1.1rem; }
+    .success h3{ font-size:1.5rem; margin-bottom:.5rem; }
+    .req-number{ display:inline-block; font-family:'Space Grotesk',sans-serif; font-weight:700; color:var(--blue-dark); background:#e3f2fb; padding:.15rem .7rem; border-radius:8px; }
+    .next-steps{ list-style:none; padding:0; margin:1.5rem 0 1.4rem; display:grid; gap:1rem; }
+    .next-steps li{ display:flex; gap:.9rem; }
+    .next-steps .b{ width:30px; height:30px; border-radius:50%; background:var(--blue); color:#fff; display:grid; place-items:center; font-weight:700; font-size:.82rem; flex-shrink:0; font-family:'Space Grotesk',sans-serif; }
+    .next-steps strong{ display:block; color:var(--text-hi); font-weight:600; }
+    .next-steps span{ font-size:.9rem; }
+    .bring-box{ background:var(--bg-soft); border-radius:14px; padding:1rem 1.2rem; font-size:.92rem; margin-bottom:1.5rem; }
+    .bring-box h4{ font-size:.95rem; margin-bottom:.45rem; }
+    .bring-box ul{ margin:0; padding-left:1.15rem; }
+
+    /* =========================================================
+       8. FAQ
+       ========================================================= */
+    .faq .accordion-item{ border:none; border-bottom:1px solid var(--border); background:transparent; }
+    .faq .accordion-button{ background:transparent; box-shadow:none; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:1.05rem; color:var(--text-hi); padding:1.15rem 0; }
+    .faq .accordion-button:not(.collapsed){ color:var(--blue-dark); background:transparent; }
+    .faq .accordion-button:focus{ box-shadow:0 0 0 .2rem rgba(47,111,209,.2); }
+    .faq .accordion-body{ padding:0 0 1.3rem; font-size:.97rem; max-width:680px; }
+    .demo-note{ display:flex; gap:.7rem; align-items:flex-start; font-size:.88rem; background:var(--warning-bg); color:#7a5212; border-radius:12px; padding:.85rem 1rem; max-width:680px; margin-top:1.8rem; }
+    .demo-note i{ margin-top:.25rem; }
+
+    /* =========================================================
+       9. FOOTER
+       ========================================================= */
+    footer{ background:#0f1d33; color:#b5c2d6; padding:3.6rem 0 1.6rem; }
+    footer .brand{ color:#fff; }
+    footer .brand .accent{ color:#7fc4ff; }
+    footer h4{ color:#fff; font-size:.95rem; margin-bottom:1rem; }
+    footer ul{ list-style:none; margin:0; padding:0; }
+    footer li{ margin-bottom:.6rem; font-size:.9rem; }
+    footer a{ color:#b5c2d6; transition:color .2s; }
+    footer a:hover{ color:#fff; }
+    footer p{ font-size:.9rem; max-width:320px; }
+    .footer-bottom{ border-top:1px solid rgba(255,255,255,.12); margin-top:2.4rem; padding-top:1.3rem; font-size:.8rem; color:#8fa0b8; }
+
+    /* ---- WhatsApp flotante ---- */
+    .whatsapp-float{ position:fixed; right:1.4rem; bottom:1.4rem; z-index:1040; width:58px; height:58px; border-radius:50%; background:#1fa855; color:#fff; display:grid; place-items:center; font-size:1.65rem; box-shadow:0 12px 28px -8px rgba(31,168,85,.65); transition:transform .25s var(--ease); }
+    .whatsapp-float::before{ content:""; position:absolute; inset:0; border-radius:50%; border:2px solid #1fa855; animation:pulseRing 2.4s infinite; }
+    @keyframes pulseRing{ 0%{ transform:scale(1); opacity:.7; } 100%{ transform:scale(1.55); opacity:0; } }
+    .whatsapp-float:hover{ transform:scale(1.08); color:#fff; }
+    .whatsapp-tip{ position:absolute; right:70px; top:50%; transform:translateY(-50%) translateX(8px); background:#161f2e; color:#fff; padding:.5rem .9rem; border-radius:8px; font-size:.82rem; white-space:nowrap; opacity:0; visibility:hidden; transition:opacity .25s, transform .25s var(--ease); }
+    .whatsapp-float:hover .whatsapp-tip, .whatsapp-float:focus-visible .whatsapp-tip{ opacity:1; visibility:visible; transform:translateY(-50%) translateX(0); }
+
+    @media (max-width:575px){
+      .whatsapp-float{ width:50px; height:50px; font-size:1.45rem; right:.9rem; bottom:.9rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      html{ scroll-behavior:auto; }
+      *, *::before, *::after{ animation:none !important; transition:none !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#contenido">Ir al contenido</a>
+
+  <!-- =========================================================
+       NAVEGACIÓN
+       ========================================================= -->
+  <nav class="site-nav navbar navbar-expand-lg" aria-label="Navegación principal">
+    <div class="container container-xl">
+      <a class="brand" href="#top" id="top">
+        <span class="brand-icon"><i class="fa-solid fa-diagram-project" aria-hidden="true"></i></span>
+        <span>Nexa<span class="accent">Cred</span></span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Abrir menú">
+        <i class="fa-solid fa-bars" aria-hidden="true"></i>
+      </button>
+      <div class="collapse navbar-collapse justify-content-lg-end" id="navMenu">
+        <div class="d-flex flex-column flex-lg-row align-items-lg-center py-3 py-lg-0 gap-1">
+          <a class="nav-link-nx" href="#simulador">Simulador</a>
+          <a class="nav-link-nx" href="#nosotros">Quiénes somos</a>
+          <a class="nav-link-nx" href="#como-funciona">Cómo funciona</a>
+          <a class="nav-link-nx" href="#requisitos">Requisitos</a>
+          <a class="nav-link-nx" href="#preguntas">Preguntas</a>
+          <a class="btn-nx ms-lg-2 mt-2 mt-lg-0" href="#solicitud" style="padding:.55rem 1.2rem; font-size:.9rem;">Solicitar préstamo</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main id="contenido">
+
+    <!-- =========================================================
+         HERO + SIMULADOR
+         ========================================================= -->
+    <section class="hero" id="simulador" aria-labelledby="simTitle">
+      <div class="container container-xl">
+        <div class="row gy-5 gx-lg-5 align-items-center">
+          <div class="col-lg-6">
+            <h1>Sabé cuánto vas a pagar antes de pedir tu préstamo</h1>
+            <p class="lead-copy">Elegí el monto y las cuotas, mirá la tasa y el costo financiero total, y si te sirve lo solicitás desde acá. El trámite se termina en nuestra sucursal.</p>
+            <ul class="hero-points">
+              <li><i class="fa-solid fa-check" aria-hidden="true"></i> Simular es gratis y no te compromete a nada</li>
+              <li><i class="fa-solid fa-check" aria-hidden="true"></i> Te respondemos en hasta 48 horas hábiles</li>
+              <li><i class="fa-solid fa-check" aria-hidden="true"></i> Firmás en sucursal, con atención personal</li>
+            </ul>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="sim-card">
+              <h2 id="simTitle">Simulá tu préstamo</h2>
+
+              <label class="sim-label" for="montoInput">¿Cuánto necesitás?</label>
+              <div class="money-box">
+                <span aria-hidden="true">$</span>
+                <input id="montoInput" class="num" type="text" inputmode="numeric" autocomplete="off" value="500.000" aria-describedby="montoHint">
+              </div>
+              <div class="range-wrap">
+                <input id="montoRange" class="range" type="range" min="50000" max="5000000" step="10000" value="500000" aria-label="Monto del préstamo">
+                <div class="range-scale"><span>$ 50.000</span><span>$ 5.000.000</span></div>
+              </div>
+              <div class="money-hint" id="montoHint" role="status"></div>
+
+              <span class="sim-label" id="plazoLabel" style="margin-top:.3rem;">¿En cuántas cuotas?</span>
+              <div class="plazo-group" role="radiogroup" aria-labelledby="plazoLabel" id="plazoGroup"></div>
+
+              <div class="result" aria-live="polite">
+                <div class="result-main-label">Tu cuota mensual estimada</div>
+                <div class="result-main num"><span id="resCuota" aria-hidden="true">$ 0</span> <small>por mes</small></div>
+                <span class="visually-hidden-live" id="resCuotaSr"></span>
+                <dl class="result-grid mb-0">
+                  <div><dt>Recibís en tu cuenta</dt><dd class="num" id="resRecibe">—</dd></div>
+                  <div><dt>Total a pagar</dt><dd class="num" id="resTotal">—</dd></div>
+                  <div><dt>Tasa nominal anual (TNA)</dt><dd class="num" id="resTna">—</dd></div>
+                  <div><dt>Costo financiero total (CFT)</dt><dd class="num" id="resCft">—</dd></div>
+                </dl>
+              </div>
+
+              <div class="sim-actions">
+                <a class="btn-nx" href="#solicitud" id="btnSolicitar">Solicitar este préstamo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+                <button class="btn-link-nx" type="button" data-bs-toggle="collapse" data-bs-target="#detalleCuotas" aria-expanded="false" aria-controls="detalleCuotas">Ver el detalle de las cuotas</button>
+              </div>
+              <div class="collapse" id="detalleCuotas">
+                <div class="schedule-wrap" tabindex="0" aria-label="Detalle de cuotas">
+                  <table class="schedule num">
+                    <thead><tr><th scope="col">N°</th><th scope="col">Capital</th><th scope="col">Interés</th><th scope="col">Seguro</th><th scope="col">Cuota</th><th scope="col">Saldo</th></tr></thead>
+                    <tbody id="tablaCuotas"></tbody>
+                  </table>
+                </div>
+              </div>
+              <p class="sim-legal">Simulación orientativa con sistema francés de amortización. Incluye seguro de vida; el gasto de otorgamiento (2%) se descuenta del monto que recibís. La tasa y el monto definitivos dependen de la evaluación crediticia y no constituyen una oferta.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         QUIÉNES SOMOS
+         ========================================================= -->
+    <section class="block soft" id="nosotros" aria-labelledby="nosotrosTitle">
+      <div class="container container-xl">
+        <div class="row gy-5 gx-lg-5">
+          <div class="col-lg-7 about-text">
+            <h2 class="section-title" id="nosotrosTitle">Somos una financiera que presta con las reglas claras</h2>
+            <p>NexaCred otorga préstamos personales y para comercios a quienes necesitan financiar un proyecto, comprar equipamiento o sostener su capital de trabajo. Analizamos cada solicitud con un estudio de riesgo propio y te mostramos desde el principio la tasa, el costo financiero total y cada cuota.</p>
+            <p>La solicitud la hacés online para ahorrar tiempo, pero la aprobación final es presencial: validamos tu documentación original y tus datos biométricos, y firmás el contrato frente a una persona de nuestro equipo. Así cuidamos tu identidad y la de todos.</p>
+            <ul class="principles">
+              <li>
+                <span class="ico"><i class="fa-solid fa-eye" aria-hidden="true"></i></span>
+                <div><h3>Transparencia</h3><p>El CFT y el total a pagar se ven antes de pedir nada, no después de firmar.</p></div>
+              </li>
+              <li>
+                <span class="ico"><i class="fa-solid fa-fingerprint" aria-hidden="true"></i></span>
+                <div><h3>Identidad protegida</h3><p>Validamos tu identidad con datos biométricos en sucursal para evitar fraudes.</p></div>
+              </li>
+              <li>
+                <span class="ico"><i class="fa-solid fa-bell" aria-hidden="true"></i></span>
+                <div><h3>Acompañamiento</h3><p>Te avisamos cada vencimiento por email y WhatsApp para que no se te pase ninguna cuota.</p></div>
+              </li>
+            </ul>
+          </div>
+
+          <div class="col-lg-5">
+            <div class="about-side">
+              <h3>Para qué podés usar tu préstamo</h3>
+              <ul class="use-list">
+                <li><strong>Préstamo personal</strong><span>Proyectos, estudios, arreglos</span></li>
+                <li><strong>Capital de trabajo</strong><span>Comercios y pymes</span></li>
+                <li><strong>Equipamiento</strong><span>Maquinaria y herramientas</span></li>
+                <li><strong>Refinanciación</strong><span>Ordenar deudas existentes</span></li>
+              </ul>
+              <div class="branch-box">
+                <h4>Sucursal Centro</h4>
+                <p><i class="fa-solid fa-location-dot" aria-hidden="true"></i> San Martín 850, San Miguel de Tucumán</p>
+                <p><i class="fa-regular fa-clock" aria-hidden="true"></i> Lunes a viernes de 9 a 16 hs</p>
+                <p><i class="fa-solid fa-phone" aria-hidden="true"></i> +54 11 0000-0000</p>
+                <p><i class="fa-regular fa-envelope" aria-hidden="true"></i> contacto@nexacred.com</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         CÓMO FUNCIONA
+         ========================================================= -->
+    <section class="block" id="como-funciona" aria-labelledby="flowTitle">
+      <div class="container container-xl">
+        <h2 class="section-title" id="flowTitle">De la simulación al dinero en tu cuenta</h2>
+        <p class="section-lead">Cuatro pasos. Los dos primeros los hacés desde tu casa; el último, en nuestra sucursal.</p>
+
+        <ol class="flow">
+          <li>
+            <div class="step-dot" aria-hidden="true">1</div>
+            <span class="where"><i class="fa-solid fa-laptop" aria-hidden="true"></i> Online</span>
+            <h3>Simulás tu préstamo</h3>
+            <p>Elegís el monto y las cuotas, y ves cuánto vas a pagar por mes y en total.</p>
+          </li>
+          <li>
+            <div class="step-dot" aria-hidden="true">2</div>
+            <span class="where"><i class="fa-solid fa-laptop" aria-hidden="true"></i> Online</span>
+            <h3>Completás la solicitud</h3>
+            <p>Cargás tus datos y subís la documentación desde el celular o la computadora.</p>
+          </li>
+          <li>
+            <div class="step-dot" aria-hidden="true">3</div>
+            <span class="where"><i class="fa-solid fa-gears" aria-hidden="true"></i> Lo hacemos nosotros</span>
+            <h3>Analizamos tu pedido</h3>
+            <p>Revisamos tu solicitud en hasta 48 horas hábiles. Si tiene el visto bueno, te avisamos por email y WhatsApp.</p>
+          </li>
+          <li class="in-branch">
+            <div class="step-dot" aria-hidden="true">4</div>
+            <span class="where"><i class="fa-solid fa-building" aria-hidden="true"></i> En sucursal</span>
+            <h3>Validás y firmás</h3>
+            <p>Llevás la documentación original, validamos tus datos biométricos, firmás el contrato y acreditamos el préstamo.</p>
+          </li>
+        </ol>
+
+        <div class="flow-note">
+          <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+          <span>El visto bueno online no es la aprobación final. El préstamo se otorga recién cuando la documentación original y tus datos coinciden con lo que cargaste.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         REQUISITOS
+         ========================================================= -->
+    <section class="block soft" id="requisitos" aria-labelledby="reqTitle">
+      <div class="container container-xl">
+        <h2 class="section-title" id="reqTitle">Qué necesitás tener a mano</h2>
+        <p class="section-lead mb-5">Subís una copia digital al solicitar y llevás los originales a la sucursal.</p>
+        <div class="row gy-5 gx-lg-5">
+          <div class="col-lg-6 req-col">
+            <h3>Documentación</h3>
+            <ul class="req-list">
+              <li><i class="fa-solid fa-id-card" aria-hidden="true"></i><div><strong>DNI vigente</strong><span>Frente y dorso.</span></div></li>
+              <li><i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i><div><strong>Comprobante de ingresos</strong><span>Último recibo de sueldo. Monotributistas y autónomos: constancia de inscripción y últimos 3 pagos.</span></div></li>
+              <li><i class="fa-solid fa-house" aria-hidden="true"></i><div><strong>Comprobante de domicilio</strong><span>Factura de un servicio a tu nombre, de los últimos 3 meses.</span></div></li>
+            </ul>
+          </div>
+          <div class="col-lg-6 req-col">
+            <h3>Condiciones</h3>
+            <ul class="req-list">
+              <li><i class="fa-solid fa-cake-candles" aria-hidden="true"></i><div><strong>Tener entre 18 y 75 años</strong><span>Al momento de solicitar el préstamo.</span></div></li>
+              <li><i class="fa-solid fa-briefcase" aria-hidden="true"></i><div><strong>Ingresos que puedas demostrar</strong><span>En relación de dependencia, independientes, jubilados o con comercio propio.</span></div></li>
+              <li><i class="fa-solid fa-scale-balanced" aria-hidden="true"></i><div><strong>Cuota hasta el 35% de tus ingresos</strong><span>Es la referencia que usamos para cuidar que el préstamo no te ahogue.</span></div></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         SOLICITUD
+         ========================================================= -->
+    <section class="block" id="solicitud" aria-labelledby="solTitle">
+      <div class="container container-xl">
+        <div class="request-shell">
+          <div class="row g-0">
+            <div class="col-lg-4">
+              <div class="request-aside">
+                <h2 id="solTitle">Pedí tu préstamo</h2>
+                <p>Completá el formulario en unos minutos. No pagás nada por solicitarlo.</p>
+                <ul>
+                  <li><i class="fa-solid fa-lock" aria-hidden="true"></i> Tus datos se usan solo para evaluar tu solicitud.</li>
+                  <li><i class="fa-solid fa-clock" aria-hidden="true"></i> Respuesta en hasta 48 horas hábiles.</li>
+                  <li><i class="fa-solid fa-building" aria-hidden="true"></i> La firma y la acreditación se hacen en sucursal.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="col-lg-8">
+              <div class="request-main">
+
+                <!-- Formulario por pasos -->
+                <div id="requestFlow">
+                  <div class="stepper" aria-hidden="true">
+                    <span class="s active" id="st1">1</span><span class="l" id="ln1"></span>
+                    <span class="s" id="st2">2</span><span class="l" id="ln2"></span>
+                    <span class="s" id="st3">3</span><span class="l" id="ln3"></span>
+                    <span class="s" id="st4">4</span>
+                  </div>
+                  <div class="stepper-names" aria-hidden="true">
+                    <span id="sn1" class="on">Tu préstamo</span><span id="sn2">Tus datos</span><span id="sn3">Documentación</span><span id="sn4">Confirmar</span>
+                  </div>
+
+                  <form id="requestForm" novalidate>
+                    <!-- Paso 1 -->
+                    <div id="step1">
+                      <h3 class="step-title">Revisá tu préstamo</h3>
+                      <p class="step-sub">Este es el préstamo que simulaste. Si querés cambiarlo, volvé al simulador.</p>
+                      <div class="loan-summary num" id="loanSummary"></div>
+                      <button class="btn-link-nx mb-3" type="button" id="btnVolverSim"><i class="fa-solid fa-arrow-up me-1" aria-hidden="true"></i> Cambiar monto o cuotas</button>
+                      <div class="mb-2">
+                        <label class="form-label" for="fDestino">¿Para qué lo vas a usar?</label>
+                        <select class="form-select" id="fDestino">
+                          <option>Gastos personales</option>
+                          <option>Capital de trabajo</option>
+                          <option>Compra de equipamiento</option>
+                          <option>Refinanciación de deudas</option>
+                          <option>Otro</option>
+                        </select>
+                      </div>
+                      <div class="step-actions"><span></span><button type="button" class="btn-nx" data-next="1">Continuar</button></div>
+                    </div>
+
+                    <!-- Paso 2 -->
+                    <div id="step2" hidden>
+                      <h3 class="step-title">Contanos quién sos</h3>
+                      <p class="step-sub">Usá los mismos datos que figuran en tu DNI.</p>
+                      <div class="row g-3">
+                        <div class="col-md-8">
+                          <label class="form-label" for="fNombre">Nombre y apellido</label>
+                          <input class="form-control" id="fNombre" autocomplete="name" placeholder="Como figura en tu DNI">
+                          <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="col-md-4">
+                          <label class="form-label" for="fDni">DNI</label>
+                          <input class="form-control" id="fDni" inputmode="numeric" autocomplete="off" placeholder="Sin puntos">
+                          <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="col-md-6">
+                          <label class="form-label" for="fNacimiento">Fecha de nacimiento</label>
+                          <input class="form-control" id="fNacimiento" type="date" autocomplete="bday">
+                          <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="col-md-6">
+                          <label class="form-label" for="fTel">Celular</label>
+                          <input class="form-control" id="fTel" type="tel" autocomplete="tel" placeholder="Ej: 381 555 0000">
+                          <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="col-12">
+                          <label class="form-label" for="fEmail">Email</label>
+                          <input class="form-control" id="fEmail" type="email" autocomplete="email" placeholder="nombre@email.com">
+                          <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="col-md-7">
+                          <label class="form-label" for="fDomicilio">Domicilio</label>
+                          <input class="form-control" id="fDomicilio" autocomplete="street-address" placeholder="Calle y número">
+                          <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="col-md-5">
+                          <label class="form-label" for="fLocalidad">Localidad</label>
+                          <input class="form-control" id="fLocalidad" autocomplete="address-level2">
+                          <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="col-md-6">
+                          <label class="form-label" for="fLaboral">Situación laboral</label>
+                          <select class="form-select" id="fLaboral">
+                            <option value="">Elegí una opción</option>
+                            <option>Empleado en relación de dependencia</option>
+                            <option>Monotributista o autónomo</option>
+                            <option>Comerciante con negocio propio</option>
+                            <option>Jubilado o pensionado</option>
+                          </select>
+                          <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="col-md-6">
+                          <label class="form-label" for="fIngreso">Ingreso mensual neto ($)</label>
+                          <input class="form-control" id="fIngreso" inputmode="numeric" autocomplete="off" placeholder="Ej: 900.000">
+                          <div class="invalid-feedback"></div>
+                        </div>
+                      </div>
+                      <div class="step-actions"><button type="button" class="btn-nx-outline" data-prev="2">Atrás</button><button type="button" class="btn-nx" data-next="2">Continuar</button></div>
+                    </div>
+
+                    <!-- Paso 3 -->
+                    <div id="step3" hidden>
+                      <h3 class="step-title">Subí tu documentación</h3>
+                      <p class="step-sub">Fotos nítidas o PDF, de hasta 5 MB cada archivo. Los originales los llevás a la sucursal.</p>
+                      <div id="docsList"></div>
+                      <div class="step-actions"><button type="button" class="btn-nx-outline" data-prev="3">Atrás</button><button type="button" class="btn-nx" data-next="3">Continuar</button></div>
+                    </div>
+
+                    <!-- Paso 4 -->
+                    <div id="step4" hidden>
+                      <h3 class="step-title">Revisá y enviá</h3>
+                      <p class="step-sub">Chequeá que esté todo bien antes de enviar.</p>
+                      <div class="loan-summary num" id="finalSummary"></div>
+                      <div class="ratio-note" id="ratioNote" hidden></div>
+                      <div class="form-check mb-1">
+                        <input class="form-check-input" type="checkbox" id="fConsent">
+                        <label class="form-check-label" for="fConsent" style="font-size:.9rem;">Confirmo que los datos son verdaderos y autorizo a NexaCred a usarlos para evaluar mi solicitud. Entiendo que la aprobación final requiere ir a la sucursal con la documentación original.</label>
+                        <div class="invalid-feedback" id="consentErr">Tenés que aceptar para poder enviar la solicitud.</div>
+                      </div>
+                      <div class="step-actions"><button type="button" class="btn-nx-outline" data-prev="4">Atrás</button><button type="submit" class="btn-nx">Enviar solicitud</button></div>
+                    </div>
+                  </form>
+                </div>
+
+                <!-- Pantalla de éxito -->
+                <div class="success" id="successView" tabindex="-1">
+                  <div class="check"><i class="fa-solid fa-check" aria-hidden="true"></i></div>
+                  <h3>Recibimos tu solicitud</h3>
+                  <p>Tu número de solicitud es <span class="req-number" id="reqNumber">NC-0000</span>. Guardalo por si necesitás consultarnos.</p>
+                  <ol class="next-steps">
+                    <li><span class="b" aria-hidden="true">1</span><div><strong>Analizamos tu pedido</strong><span>En hasta 48 horas hábiles revisamos tus datos y tu documentación.</span></div></li>
+                    <li><span class="b" aria-hidden="true">2</span><div><strong>Te avisamos</strong><span>Si tiene el visto bueno, te escribimos a <b id="okEmail"></b> y por WhatsApp.</span></div></li>
+                    <li><span class="b" aria-hidden="true">3</span><div><strong>Vas a la sucursal</strong><span>Validamos tu documentación original y tus datos biométricos, firmás y acreditamos el préstamo.</span></div></li>
+                  </ol>
+                  <div class="bring-box">
+                    <h4>Qué llevar a la sucursal</h4>
+                    <ul>
+                      <li>DNI original</li>
+                      <li>Último recibo de sueldo o comprobante de ingresos</li>
+                      <li>Comprobante de domicilio a tu nombre</li>
+                    </ul>
+                  </div>
+                  <button class="btn-nx-outline" type="button" id="btnNueva">Hacer otra simulación</button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         PREGUNTAS FRECUENTES
+         ========================================================= -->
+    <section class="block soft" id="preguntas" aria-labelledby="faqTitle">
+      <div class="container container-xl">
+        <h2 class="section-title" id="faqTitle">Preguntas frecuentes</h2>
+        <div class="accordion faq mt-4" id="faqAcc">
+          <div class="accordion-item">
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q1" aria-expanded="false" aria-controls="q1">¿Cuánto tardan en responderme?</button></h3>
+            <div id="q1" class="accordion-collapse collapse" data-bs-parent="#faqAcc"><div class="accordion-body">Revisamos tu solicitud en hasta 48 horas hábiles y te avisamos por email y WhatsApp si tiene el visto bueno.</div></div>
+          </div>
+          <div class="accordion-item">
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q2" aria-expanded="false" aria-controls="q2">¿Por qué tengo que ir a la sucursal?</button></h3>
+            <div id="q2" class="accordion-collapse collapse" data-bs-parent="#faqAcc"><div class="accordion-body">Para validar tu documentación original y tus datos biométricos, y para firmar el contrato. Es un control que evita fraudes y suplantaciones de identidad, y te protege a vos también.</div></div>
+          </div>
+          <div class="accordion-item">
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q3" aria-expanded="false" aria-controls="q3">¿Qué es el CFT y por qué importa?</button></h3>
+            <div id="q3" class="accordion-collapse collapse" data-bs-parent="#faqAcc"><div class="accordion-body">El Costo Financiero Total suma a la tasa de interés los gastos de otorgamiento y el seguro. Es el número que tenés que comparar entre distintas ofertas, porque refleja lo que realmente te cuesta el préstamo.</div></div>
+          </div>
+          <div class="accordion-item">
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q4" aria-expanded="false" aria-controls="q4">¿La simulación es una oferta firme?</button></h3>
+            <div id="q4" class="accordion-collapse collapse" data-bs-parent="#faqAcc"><div class="accordion-body">No. Es una estimación para que te hagas una idea. La tasa, el monto y las cuotas definitivas dependen del análisis crediticio de tu solicitud.</div></div>
+          </div>
+          <div class="accordion-item">
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q5" aria-expanded="false" aria-controls="q5">¿Puedo cancelar el préstamo antes de tiempo?</button></h3>
+            <div id="q5" class="accordion-collapse collapse" data-bs-parent="#faqAcc"><div class="accordion-body">Sí. Podés cancelar total o parcialmente desde la sucursal, y los intereses se calculan sobre el capital que todavía debas.</div></div>
+          </div>
+          <div class="accordion-item">
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q6" aria-expanded="false" aria-controls="q6">¿Qué pasa con mis datos?</button></h3>
+            <div id="q6" class="accordion-collapse collapse" data-bs-parent="#faqAcc"><div class="accordion-body">Se usan solo para evaluar tu solicitud. Los datos biométricos se capturan en la sucursal, con tu consentimiento expreso.</div></div>
+          </div>
+        </div>
+        <div class="demo-note">
+          <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+          <span><strong>Sitio demostrativo.</strong> Las tasas y condiciones son ficticias, y lo que cargues en el formulario no se envía a ningún servidor.</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =========================================================
+       FOOTER
+       ========================================================= -->
+  <footer>
+    <div class="container container-xl">
+      <div class="row g-4">
+        <div class="col-lg-5">
+          <a class="brand mb-3" href="#top">
+            <span class="brand-icon"><i class="fa-solid fa-diagram-project" aria-hidden="true"></i></span>
+            <span>Nexa<span class="accent">Cred</span></span>
+          </a>
+          <p>Préstamos personales y para comercios, con la tasa y el costo total a la vista desde el primer paso.</p>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h4>Secciones</h4>
+          <ul>
+            <li><a href="#simulador">Simulador</a></li>
+            <li><a href="#nosotros">Quiénes somos</a></li>
+            <li><a href="#como-funciona">Cómo funciona</a></li>
+            <li><a href="#solicitud">Solicitar préstamo</a></li>
+          </ul>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="#">Términos y condiciones</a></li>
+            <li><a href="#">Política de privacidad</a></li>
+            <li><a href="#">Defensa del consumidor</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-3">
+          <h4>Contacto</h4>
+          <ul>
+            <li>San Martín 850, San Miguel de Tucumán</li>
+            <li>Lunes a viernes de 9 a 16 hs</li>
+            <li><a href="mailto:contacto@nexacred.com">contacto@nexacred.com</a></li>
+            <li><a href="tel:+541100000000">+54 11 0000-0000</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom d-flex flex-wrap justify-content-between gap-2">
+        <span>&copy; 2026 NexaCred S.R.L. Todos los derechos reservados.</span>
+        <span>Sitio demostrativo · Proyecto académico</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Botón flotante de WhatsApp -->
+  <a href="https://wa.me/5491100000000" class="whatsapp-float" target="_blank" rel="noopener" aria-label="Comunicate con nosotros por WhatsApp">
+    <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>
+    <span class="whatsapp-tip">Comunicate con nosotros</span>
+  </a>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    /* =========================================================
+       PARÁMETROS DEL PRÉSTAMO (editar acá para cambiar las condiciones)
+       ========================================================= */
+    var MIN = 50000, MAX = 5000000, STEP = 10000;
+    var PLAZOS = [6, 12, 18, 24, 36, 48];
+    // TNA según cantidad de cuotas (valores ficticios para la demo)
+    var TNA = { 6: 0.52, 12: 0.56, 18: 0.60, 24: 0.64, 36: 0.68, 48: 0.72 };
+    var GASTO_OTORGAMIENTO = 0.02;   // 2% del monto, se descuenta del desembolso
+    var SEGURO_MENSUAL = 0.0005;     // 0,05% mensual sobre el monto solicitado
+    var RATIO_MAX = 0.35;            // referencia cuota / ingreso
+
+    var state = { monto: 500000, plazo: 24, calc: null };
+
+    function $(id) { return document.getElementById(id); }
+    var nf = new Intl.NumberFormat('es-AR', { maximumFractionDigits: 0 });
+    function money(n) { var v = Math.round(n); if (v === 0) v = 0; return '$ ' + nf.format(v); }
+    function pct(x, d) { return (x * 100).toFixed(d).replace('.', ',') + '%'; }
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+
+    /* =========================================================
+       CÁLCULO (sistema francés + CFT por TIR)
+       ========================================================= */
+    function cftTea(recibe, cuota, n) {
+      // Tasa mensual r tal que el valor presente de las cuotas = monto que se recibe
+      var lo = 0, hi = 1;
+      for (var k = 0; k < 100; k++) {
+        var mid = (lo + hi) / 2, pv = 0;
+        for (var t = 1; t <= n; t++) pv += cuota / Math.pow(1 + mid, t);
+        if (pv > recibe) lo = mid; else hi = mid;
+      }
+      return Math.pow(1 + (lo + hi) / 2, 12) - 1;
+    }
+
+    function calcular(monto, n) {
+      var tna = TNA[n], i = tna / 12;
+      var cuotaPura = monto * i / (1 - Math.pow(1 + i, -n));
+      var seguro = monto * SEGURO_MENSUAL;
+      var cuota = cuotaPura + seguro;
+      var recibe = monto - monto * GASTO_OTORGAMIENTO;
+      return {
+        tna: tna, i: i, cuotaPura: cuotaPura, seguro: seguro, cuota: cuota,
+        recibe: recibe, total: cuota * n, cft: cftTea(recibe, cuota, n)
+      };
+    }
+    window.__nxCalcular = calcular; // expuesto para poder verificar los cálculos
+
+    /* =========================================================
+       SIMULADOR
+       ========================================================= */
+    var plazoGroup = $('plazoGroup');
+    PLAZOS.forEach(function (n) {
+      var d = document.createElement('div');
+      d.className = 'plazo-chip';
+      d.innerHTML = '<input type="radio" name="plazo" id="plz' + n + '" value="' + n + '"' + (n === state.plazo ? ' checked' : '') + '>' +
+                    '<label for="plz' + n + '">' + n + '<small>cuotas</small></label>';
+      plazoGroup.appendChild(d);
+    });
+
+    function animateMoney(el, to) {
+      var from = el._v == null ? to : el._v;
+      el._v = to;
+      cancelAnimationFrame(el._raf);
+      if (reduceMotion || from === to) { el.textContent = money(to); return; }
+      var t0 = performance.now(), dur = 240;
+      (function step(now) {
+        var p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+        el.textContent = money(from + (to - from) * e);
+        if (p < 1) el._raf = requestAnimationFrame(step);
+      })(t0);
+    }
+
+    function renderTabla(c) {
+      var saldo = state.monto, rows = '';
+      for (var k = 1; k <= state.plazo; k++) {
+        var interes = saldo * c.i, capital = c.cuotaPura - interes;
+        saldo = Math.max(0, saldo - capital);
+        rows += '<tr><td>' + k + '</td><td>' + money(capital) + '</td><td>' + money(interes) + '</td><td>' +
+                money(c.seguro) + '</td><td>' + money(c.cuota) + '</td><td>' + money(saldo) + '</td></tr>';
+      }
+      $('tablaCuotas').innerHTML = rows;
+    }
+
+    function renderSim() {
+      var c = calcular(state.monto, state.plazo);
+      state.calc = c;
+      animateMoney($('resCuota'), c.cuota);
+      $('resCuotaSr').textContent = 'Cuota mensual estimada: ' + money(c.cuota);
+      $('resRecibe').textContent = money(c.recibe);
+      $('resTotal').textContent = money(c.total);
+      $('resTna').textContent = pct(c.tna, 0);
+      $('resCft').textContent = pct(c.cft, 1);
+      var range = $('montoRange');
+      range.value = state.monto;
+      range.style.setProperty('--pct', ((state.monto - MIN) / (MAX - MIN) * 100) + '%');
+      renderTabla(c);
+      renderLoanSummary();
+    }
+
+    var montoInput = $('montoInput'), hint = $('montoHint');
+    function digits(s) { return String(s).replace(/\D/g, ''); }
+
+    montoInput.addEventListener('input', function () {
+      var raw = parseInt(digits(montoInput.value) || '0', 10);
+      if (raw > MAX) raw = MAX;
+      montoInput.value = raw ? nf.format(raw) : '';
+      if (raw >= MIN) {
+        hint.textContent = '';
+        state.monto = raw;
+        renderSim();
+      } else {
+        hint.textContent = 'El monto mínimo es ' + money(MIN) + '.';
+      }
+    });
+    montoInput.addEventListener('blur', function () {
+      var raw = parseInt(digits(montoInput.value) || '0', 10);
+      var v = Math.min(MAX, Math.max(MIN, Math.round(raw / 1000) * 1000));
+      state.monto = v;
+      montoInput.value = nf.format(v);
+      hint.textContent = '';
+      renderSim();
+    });
+    montoInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); montoInput.blur(); } });
+
+    $('montoRange').addEventListener('input', function (e) {
+      state.monto = parseInt(e.target.value, 10);
+      montoInput.value = nf.format(state.monto);
+      hint.textContent = '';
+      renderSim();
+    });
+    plazoGroup.addEventListener('change', function (e) {
+      if (e.target.name === 'plazo') { state.plazo = parseInt(e.target.value, 10); renderSim(); }
+    });
+
+    /* =========================================================
+       SOLICITUD: resumen del préstamo
+       ========================================================= */
+    function rows(pairs, hlFirst) {
+      return pairs.map(function (p, idx) {
+        return '<div class="row-s' + (hlFirst && idx === 0 ? ' hl' : '') + '"><span>' + esc(p[0]) + '</span><span>' + esc(p[1]) + '</span></div>';
+      }).join('');
+    }
+    function loanPairs() {
+      var c = state.calc;
+      return [
+        ['Monto solicitado', money(state.monto)],
+        ['Cuotas', state.plazo + ' cuotas mensuales'],
+        ['Cuota mensual estimada', money(c.cuota)],
+        ['TNA / CFT', pct(c.tna, 0) + ' / ' + pct(c.cft, 1)],
+        ['Total a pagar', money(c.total)]
+      ];
+    }
+    function renderLoanSummary() { $('loanSummary').innerHTML = rows(loanPairs(), false); }
+
+    $('btnVolverSim').addEventListener('click', function () {
+      $('simulador').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' });
+      montoInput.focus({ preventScroll: true });
+    });
+
+    /* =========================================================
+       SOLICITUD: formulario por pasos
+       ========================================================= */
+    var current = 1;
+    function goStep(n, noScroll) {
+      for (var i = 1; i <= 4; i++) {
+        $('step' + i).hidden = (i !== n);
+        var st = $('st' + i), sn = $('sn' + i);
+        st.classList.toggle('done', i < n);
+        st.classList.toggle('active', i === n);
+        sn.classList.toggle('on', i === n);
+        if (i < 4) $('ln' + i).classList.toggle('done', i < n);
+      }
+      current = n;
+      if (n === 4) renderFinal();
+      if (noScroll) return;
+      var top = $('solicitud').getBoundingClientRect().top;
+      if (top < 0 || top > 120) $('solicitud').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' });
+    }
+
+    function setError(id, msg) {
+      var el = $(id); el.classList.add('is-invalid');
+      var fb = el.parentElement.querySelector('.invalid-feedback'); if (fb) fb.textContent = msg;
+      return false;
+    }
+    function clearError(el) { el.classList.remove('is-invalid'); }
+    ['fNombre', 'fDni', 'fNacimiento', 'fTel', 'fEmail', 'fDomicilio', 'fLocalidad', 'fLaboral', 'fIngreso'].forEach(function (id) {
+      $(id).addEventListener('input', function (e) { clearError(e.target); });
+      $(id).addEventListener('change', function (e) { clearError(e.target); });
+    });
+    $('fIngreso').addEventListener('input', function (e) {
+      var d = digits(e.target.value); e.target.value = d ? nf.format(parseInt(d, 10)) : '';
+    });
+    $('fDni').addEventListener('input', function (e) { e.target.value = digits(e.target.value).slice(0, 8); });
+
+    function edad(iso) {
+      var b = new Date(iso + 'T00:00:00'), h = new Date();
+      var a = h.getFullYear() - b.getFullYear();
+      var m = h.getMonth() - b.getMonth();
+      if (m < 0 || (m === 0 && h.getDate() < b.getDate())) a--;
+      return a;
+    }
+
+    function validarDatos() {
+      var ok = true, first = null;
+      function bad(id, msg) { setError(id, msg); ok = false; if (!first) first = id; }
+      var nombre = $('fNombre').value.trim();
+      if (nombre.length < 5 || nombre.indexOf(' ') < 0) bad('fNombre', 'Ingresá tu nombre y apellido completos.');
+      if (!/^\d{7,8}$/.test($('fDni').value)) bad('fDni', 'El DNI debe tener 7 u 8 números.');
+      var nac = $('fNacimiento').value;
+      if (!nac) bad('fNacimiento', 'Ingresá tu fecha de nacimiento.');
+      else { var e = edad(nac); if (isNaN(e) || e < 18 || e > 75) bad('fNacimiento', 'Tenés que tener entre 18 y 75 años para solicitar un préstamo.'); }
+      var tel = $('fTel').value.replace(/[\s\-+()]/g, '');
+      if (!/^\d{8,13}$/.test(tel)) bad('fTel', 'Ingresá un celular válido, con código de área.');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test($('fEmail').value.trim())) bad('fEmail', 'Ingresá un email válido, por ejemplo nombre@email.com.');
+      if ($('fDomicilio').value.trim().length < 5) bad('fDomicilio', 'Ingresá tu calle y número.');
+      if ($('fLocalidad').value.trim().length < 2) bad('fLocalidad', 'Ingresá tu localidad.');
+      if (!$('fLaboral').value) bad('fLaboral', 'Elegí tu situación laboral.');
+      var ing = parseInt(digits($('fIngreso').value) || '0', 10);
+      if (ing < 1) bad('fIngreso', 'Ingresá tu ingreso mensual neto.');
+      if (first) $(first).focus();
+      return ok;
+    }
+
+    /* ---- documentación ---- */
+    var DOCS = [
+      { key: 'dniFrente', label: 'DNI (frente)', icon: 'fa-id-card' },
+      { key: 'dniDorso', label: 'DNI (dorso)', icon: 'fa-id-card-clip' },
+      { key: 'ingresos', label: 'Recibo de sueldo o comprobante de ingresos', icon: 'fa-file-invoice-dollar' },
+      { key: 'domicilio', label: 'Comprobante de domicilio', icon: 'fa-house' }
+    ];
+    var files = {};
+    var MAX_BYTES = 5 * 1024 * 1024;
+    var OK_TYPES = ['application/pdf', 'image/jpeg', 'image/png'];
+
+    var docsList = $('docsList');
+    DOCS.forEach(function (d) {
+      var row = document.createElement('div');
+      row.className = 'doc-row'; row.id = 'doc-' + d.key;
+      row.innerHTML =
+        '<div class="doc-ico"><i class="fa-solid ' + d.icon + '" aria-hidden="true"></i></div>' +
+        '<div class="doc-info"><strong>' + esc(d.label) + '</strong><small id="docmsg-' + d.key + '">Todavía no subiste este archivo</small></div>' +
+        '<input class="doc-file" type="file" id="file-' + d.key + '" accept=".pdf,.jpg,.jpeg,.png" aria-describedby="docmsg-' + d.key + '">' +
+        '<label class="btn-nx-outline doc-btn" for="file-' + d.key + '" id="docbtn-' + d.key + '">Subir</label>';
+      docsList.appendChild(row);
+      $('file-' + d.key).addEventListener('change', function (e) { onFile(d.key, e.target); });
+    });
+
+    function onFile(key, input) {
+      var row = $('doc-' + key), msg = $('docmsg-' + key), btn = $('docbtn-' + key);
+      var f = input.files && input.files[0];
+      row.classList.remove('ok', 'bad');
+      if (!f) { delete files[key]; msg.textContent = 'Todavía no subiste este archivo'; btn.textContent = 'Subir'; return; }
+      var extOk = /\.(pdf|jpe?g|png)$/i.test(f.name);
+      if (OK_TYPES.indexOf(f.type) < 0 && !extOk) {
+        delete files[key]; input.value = ''; row.classList.add('bad');
+        msg.textContent = 'Formato no permitido. Subí un PDF, JPG o PNG.'; btn.textContent = 'Subir'; return;
+      }
+      if (f.size > MAX_BYTES) {
+        delete files[key]; input.value = ''; row.classList.add('bad');
+        msg.textContent = 'El archivo pesa más de 5 MB. Probá con uno más liviano.'; btn.textContent = 'Subir'; return;
+      }
+      files[key] = f; row.classList.add('ok');
+      msg.textContent = f.name + ' · ' + Math.max(1, Math.round(f.size / 1024)) + ' KB';
+      btn.textContent = 'Cambiar';
+    }
+
+    function validarDocs() {
+      var missing = DOCS.filter(function (d) { return !files[d.key]; });
+      missing.forEach(function (d) {
+        var row = $('doc-' + d.key);
+        if (!row.classList.contains('bad')) { row.classList.add('bad'); $('docmsg-' + d.key).textContent = 'Este documento es obligatorio.'; }
+      });
+      if (missing.length) $('file-' + missing[0].key).focus();
+      return missing.length === 0;
+    }
+
+    /* ---- resumen final ---- */
+    function renderFinal() {
+      var ing = parseInt(digits($('fIngreso').value) || '0', 10);
+      var pairs = [
+        ['Solicitante', $('fNombre').value.trim()],
+        ['DNI', $('fDni').value],
+        ['Email', $('fEmail').value.trim()],
+        ['Celular', $('fTel').value.trim()],
+        ['Destino', $('fDestino').value]
+      ].concat(loanPairs()).concat([['Documentación', DOCS.filter(function (d) { return files[d.key]; }).length + ' de ' + DOCS.length + ' archivos']]);
+      $('finalSummary').innerHTML = rows(pairs, false);
+
+      var note = $('ratioNote');
+      if (ing > 0) {
+        var r = state.calc.cuota / ing;
+        note.hidden = false;
+        if (r <= RATIO_MAX) {
+          note.className = 'ratio-note good';
+          note.innerHTML = '<i class="fa-solid fa-circle-check" aria-hidden="true"></i><span>La cuota representa el <strong>' + pct(r, 0) + '</strong> de tu ingreso mensual, dentro de lo que recomendamos.</span>';
+        } else {
+          note.className = 'ratio-note warn';
+          note.innerHTML = '<i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i><span>La cuota representa el <strong>' + pct(r, 0) + '</strong> de tu ingreso mensual, por encima del ' + pct(RATIO_MAX, 0) + ' que usamos de referencia. Podés enviar igual la solicitud, o pedir un monto menor o más cuotas.</span>';
+        }
+      } else note.hidden = true;
+    }
+
+    document.querySelector('#requestForm').addEventListener('click', function (e) {
+      var t = e.target.closest('[data-next],[data-prev]'); if (!t) return;
+      if (t.hasAttribute('data-prev')) { goStep(parseInt(t.getAttribute('data-prev'), 10) - 1); return; }
+      var n = parseInt(t.getAttribute('data-next'), 10);
+      if (n === 2 && !validarDatos()) return;
+      if (n === 3 && !validarDocs()) return;
+      goStep(n + 1);
+    });
+
+    $('fConsent').addEventListener('change', function (e) { e.target.classList.remove('is-invalid'); });
+
+    $('requestForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (!$('fConsent').checked) { $('fConsent').classList.add('is-invalid'); $('fConsent').focus(); return; }
+      // Acá se enviaría la solicitud al backend de NexaCred (por ejemplo POST /api/solicitudes).
+      var num = 'NC-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random() * 100000)).padStart(5, '0');
+      $('reqNumber').textContent = num;
+      $('okEmail').textContent = $('fEmail').value.trim();
+      $('requestFlow').hidden = true;
+      var s = $('successView'); s.style.display = 'block';
+      s.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+      s.focus({ preventScroll: true });
+    });
+
+    $('btnNueva').addEventListener('click', function () {
+      $('requestForm').reset();
+      Object.keys(files).forEach(function (k) { delete files[k]; });
+      DOCS.forEach(function (d) {
+        $('doc-' + d.key).classList.remove('ok', 'bad');
+        $('docmsg-' + d.key).textContent = 'Todavía no subiste este archivo';
+        $('docbtn-' + d.key).textContent = 'Subir';
+      });
+      document.querySelectorAll('.is-invalid').forEach(function (el) { el.classList.remove('is-invalid'); });
+      $('successView').style.display = 'none';
+      $('requestFlow').hidden = false;
+      goStep(1, true);
+      $('simulador').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' });
+    });
+
+    /* cierra el menú mobile al tocar un link */
+    document.querySelectorAll('#navMenu a').forEach(function (a) {
+      a.addEventListener('click', function () {
+        var m = $('navMenu');
+        if (m.classList.contains('show')) bootstrap.Collapse.getOrCreateInstance(m).hide();
+      });
+    });
+
+    /* init */
+    $('montoInput').value = nf.format(state.monto);
+    renderSim();
+    goStep(1, true);
+  })();
+  </script>
+</body>
+</html>

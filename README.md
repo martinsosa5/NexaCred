@@ -6,11 +6,12 @@ Proyecto académico (Administración de Sistemas): NexaCred S.R.L., empresa fict
 
 | Archivo | Qué es |
 |---|---|
+| `nexacred-portal.html` | Página principal del producto, la que ve quien pide un préstamo: simulador, quiénes somos, requisitos y solicitud con documentación (tema claro) |
 | `nexacred-landing.html` | Sitio corporativo de la empresa (tema oscuro) |
 | `nexacred-manual.html` | Manual interactivo con los módulos del sistema |
 | `nexacred-app.html` | Demo funcional del sistema (tema claro) |
 
-Los tres se enlazan por ruta relativa, así que tienen que estar en la misma carpeta. Se abren directamente en el navegador, sin instalar nada.
+Se enlazan por ruta relativa, así que tienen que estar en la misma carpeta. Se abren directamente en el navegador, sin instalar nada.
 
 ## Qué hace el sistema
 
