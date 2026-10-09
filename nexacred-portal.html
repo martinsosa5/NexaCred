@@ -86,24 +86,17 @@
     /* =========================================================
        3. HERO + SIMULADOR (el elemento protagonista)
        ========================================================= */
-    .hero{ padding:4.2rem 0 5rem; background:
-        radial-gradient(ellipse 70% 60% at 85% 0%, rgba(0,184,217,.13), transparent 65%),
-        radial-gradient(ellipse 60% 55% at 0% 100%, rgba(47,111,209,.09), transparent 65%),
-        #fff; }
-    .hero h1{ font-size:clamp(2.15rem, 4.3vw, 3.2rem); font-weight:700; margin-bottom:1.1rem; max-width:560px; }
-    .hero .lead-copy{ font-size:1.1rem; max-width:500px; margin-bottom:1.8rem; }
+    /* Portada: foto de fondo + velo azul oscuro para que el texto se lea */
+    .hero{ position:relative; isolation:isolate; padding:4.6rem 0 5.2rem; color:#fff; background:
+        linear-gradient(100deg, rgba(10,32,68,.80) 0%, rgba(14,48,98,.62) 45%, rgba(20,70,130,.38) 100%),
+        url('assets/portada.jpg') center 40%/cover no-repeat, #12335f; }
+    .hero::after{ content:""; position:absolute; left:0; right:0; bottom:0; height:60px; z-index:-1; background:linear-gradient(to bottom, transparent, rgba(10,32,68,.35)); }
+    .hero .eyebrow-tag{ display:inline-flex; align-items:center; gap:.5rem; font-size:.78rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:#bfe9f7; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25); padding:.35rem .8rem; border-radius:999px; margin-bottom:1.1rem; backdrop-filter:blur(4px); }
+    .hero h1{ font-size:clamp(2.15rem, 4.3vw, 3.2rem); font-weight:700; margin-bottom:1.1rem; max-width:560px; color:#fff; text-shadow:0 2px 18px rgba(0,0,0,.25); }
+    .hero .lead-copy{ font-size:1.1rem; max-width:500px; margin-bottom:1.8rem; color:#e3eefb; }
     .hero-points{ list-style:none; margin:0; padding:0; display:grid; gap:.7rem; }
-    .hero-points li{ display:flex; gap:.75rem; align-items:flex-start; font-size:.97rem; color:var(--text-hi); }
-    .hero-points i{ width:26px; height:26px; border-radius:50%; background:#e3f2fb; color:var(--blue); display:grid; place-items:center; font-size:.72rem; flex-shrink:0; margin-top:.05rem; }
-
-    /* portada ilustrada del hero */
-    .hero-cover{ position:relative; margin:2.2rem 0 0; max-width:520px; aspect-ratio:560/380; border-radius:22px; overflow:hidden; border:1px solid #d3e4f4; box-shadow:0 26px 50px -30px rgba(31,79,158,.55); }
-    .hero-cover svg{ position:absolute; inset:0; width:100%; height:100%; display:block; }
-    .cover-chip{ position:absolute; left:14px; bottom:14px; display:flex; align-items:center; gap:.65rem; background:#fff; border-radius:14px; padding:.5rem .95rem .5rem .55rem; box-shadow:0 10px 24px -10px rgba(16,24,40,.4); }
-    .cover-chip .ok{ width:34px; height:34px; border-radius:50%; background:var(--success-bg); color:var(--success); display:grid; place-items:center; font-size:.85rem; flex-shrink:0; }
-    .cover-chip small{ display:block; font-size:.72rem; color:var(--text-low); line-height:1.2; }
-    .cover-chip strong{ display:block; font-family:'Space Grotesk',sans-serif; font-size:1.08rem; color:var(--text-hi); line-height:1.25; }
-    @media (max-width:575px){ .hero-cover{ margin-top:1.6rem; } .cover-chip{ left:10px; bottom:10px; padding:.35rem .7rem .35rem .4rem; transform:scale(.88); transform-origin:left bottom; } }
+    .hero-points li{ display:flex; gap:.75rem; align-items:flex-start; font-size:.97rem; color:#fff; }
+    .hero-points i{ width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,.18); color:#7fe3f5; display:grid; place-items:center; font-size:.72rem; flex-shrink:0; margin-top:.05rem; }
 
     .sim-card{ background:#fff; border:1px solid var(--border); border-radius:22px; padding:1.9rem 1.8rem 1.5rem; box-shadow:0 30px 60px -30px rgba(31,79,158,.35), 0 2px 6px rgba(16,24,40,.05); position:relative; }
     .sim-card::before{ content:""; position:absolute; left:28px; right:28px; top:0; height:4px; border-radius:0 0 6px 6px; background:var(--grad-deco); }
@@ -345,6 +338,7 @@
       <div class="container container-xl">
         <div class="row gy-5 gx-lg-5 align-items-center">
           <div class="col-lg-6">
+            <span class="eyebrow-tag"><i class="fa-solid fa-handshake" aria-hidden="true"></i> Préstamos personales</span>
             <h1>Sabé cuánto vas a pagar antes de pedir tu préstamo</h1>
             <p class="lead-copy">Elegí el monto y las cuotas, mirá la tasa y el costo financiero total, y si te sirve lo solicitás desde acá. El trámite se termina en nuestra sucursal.</p>
             <ul class="hero-points">
@@ -352,85 +346,6 @@
               <li><i class="fa-solid fa-check" aria-hidden="true"></i> Te respondemos en hasta 48 horas hábiles</li>
               <li><i class="fa-solid fa-check" aria-hidden="true"></i> Firmás en sucursal, con atención personal</li>
             </ul>
-
-            <!-- Portada: una clienta recibe su préstamo aprobado en la sucursal (ilustración propia, sin imágenes externas) -->
-            <figure class="hero-cover" aria-label="Una clienta recibe su préstamo aprobado en la sucursal">
-              <svg viewBox="0 0 560 380" preserveAspectRatio="xMidYMid slice" role="img" aria-labelledby="coverTitle">
-                <title id="coverTitle">Una clienta recibe su préstamo aprobado de manos de un asesor de NexaCred</title>
-                <defs>
-                  <linearGradient id="cvBg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e6f3fd"/><stop offset="1" stop-color="#cfe9f5"/></linearGradient>
-                  <linearGradient id="cvDesk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f6fd1"/><stop offset="1" stop-color="#1f4f9e"/></linearGradient>
-                </defs>
-                <rect width="560" height="380" fill="url(#cvBg)"/>
-                <circle cx="450" cy="90" r="130" fill="#fff" opacity=".45"/>
-                <circle cx="90" cy="60" r="70" fill="#fff" opacity=".35"/>
-
-                <!-- cartel de la sucursal -->
-                <g transform="translate(28 24)">
-                  <rect width="150" height="44" rx="12" fill="#fff" opacity=".92"/>
-                  <rect x="9" y="8" width="28" height="28" rx="8" fill="#2f6fd1"/>
-                  <path d="M16 27 l5 -9 l5 6 l5 -8" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                  <text x="46" y="29" font-family="'Space Grotesk', Inter, sans-serif" font-size="17" font-weight="700" fill="#161f2e">Nexa<tspan fill="#2f6fd1">Cred</tspan></text>
-                </g>
-
-                <!-- asesor (izquierda) -->
-                <path d="M92 290 V240 Q92 208 124 208 H178 Q210 208 210 240 V290 Z" fill="#2f6fd1"/>
-                <path d="M138 208 L151 232 L164 208 Z" fill="#fff"/>
-                <path d="M148 222 h6 l3 34 l-6 8 l-6 -8 z" fill="#162a52"/>
-                <rect x="140" y="188" width="22" height="24" rx="8" fill="#e8b48f"/>
-                <circle cx="151" cy="165" r="30" fill="#f1c4a0"/>
-                <path d="M120 163 Q118 126 152 126 Q186 126 183 160 Q172 142 150 144 Q130 144 120 163 Z" fill="#2b2f3a"/>
-                <circle cx="141" cy="166" r="2.6" fill="#2b2f3a"/><circle cx="161" cy="166" r="2.6" fill="#2b2f3a"/>
-                <path d="M142 178 Q151 186 160 178" stroke="#8a4b3a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-
-                <!-- clienta (derecha) -->
-                <path d="M372 170 Q366 122 410 124 Q454 122 448 170 L452 222 Q432 214 430 196 L390 196 Q388 214 368 222 Z" fill="#5b3a29"/>
-                <path d="M345 290 V242 Q345 210 377 210 H443 Q475 210 475 242 V290 Z" fill="#1d8fb5"/>
-                <rect x="399" y="190" width="22" height="24" rx="8" fill="#d9a07a"/>
-                <circle cx="410" cy="166" r="29" fill="#e5ad86"/>
-                <path d="M382 160 Q384 134 412 134 Q438 134 438 160 Q424 148 408 150 Q392 150 382 160 Z" fill="#5b3a29"/>
-                <circle cx="401" cy="168" r="2.6" fill="#2b2f3a"/><circle cx="419" cy="168" r="2.6" fill="#2b2f3a"/>
-                <circle cx="392" cy="178" r="5" fill="#f2958a" opacity=".45"/><circle cx="428" cy="178" r="5" fill="#f2958a" opacity=".45"/>
-                <path d="M399 179 Q410 191 421 179" stroke="#8a4b3a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-
-                <!-- brazos -->
-                <path d="M196 234 Q232 236 262 252" stroke="#2f6fd1" stroke-width="22" stroke-linecap="round" fill="none"/>
-                <path d="M360 236 Q330 238 318 254" stroke="#1d8fb5" stroke-width="22" stroke-linecap="round" fill="none"/>
-
-                <!-- escritorio -->
-                <rect y="282" width="560" height="98" fill="url(#cvDesk)"/>
-                <rect y="282" width="560" height="8" fill="#4a86e0" opacity=".8"/>
-
-                <!-- monedas -->
-                <rect x="52" y="270" width="36" height="12" fill="#e0a92a"/><ellipse cx="70" cy="270" rx="18" ry="6" fill="#f5c542"/>
-                <rect x="52" y="258" width="36" height="12" fill="#e0a92a"/><ellipse cx="70" cy="258" rx="18" ry="6" fill="#f5c542"/>
-                <rect x="52" y="246" width="36" height="12" fill="#e0a92a"/><ellipse cx="70" cy="246" rx="18" ry="6" fill="#f5c542"/>
-
-                <!-- planta -->
-                <path d="M524 262 Q508 242 512 220 Q528 236 524 262Z" fill="#2fa36b"/>
-                <path d="M524 262 Q540 240 536 218 Q520 236 524 262Z" fill="#27895a"/>
-                <path d="M524 262 Q516 236 524 208 Q534 236 524 262Z" fill="#35b77a"/>
-                <path d="M505 282 L511 258 H537 L543 282 Z" fill="#f2a65a"/>
-
-                <!-- documento de préstamo aprobado -->
-                <g transform="rotate(-8 290 244)">
-                  <rect x="262" y="218" width="56" height="44" rx="6" fill="#fff" stroke="#bcd3ee" stroke-width="1.5"/>
-                  <circle cx="278" cy="234" r="8" fill="#178a4c"/>
-                  <path d="M274 234 l3 3 l6 -6" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                  <rect x="290" y="229" width="22" height="4" rx="2" fill="#cfdbef"/>
-                  <rect x="268" y="247" width="40" height="4" rx="2" fill="#dbe5f3"/>
-                  <rect x="268" y="254" width="26" height="4" rx="2" fill="#dbe5f3"/>
-                </g>
-
-                <!-- manos -->
-                <circle cx="268" cy="254" r="10" fill="#f1c4a0"/>
-                <circle cx="312" cy="256" r="10" fill="#e5ad86"/>
-              </svg>
-              <figcaption class="cover-chip">
-                <span class="ok"><i class="fa-solid fa-check" aria-hidden="true"></i></span>
-                <span><small>Acreditado en tu cuenta</small><strong class="num" id="coverAmount">$ 0</strong></span>
-              </figcaption>
-            </figure>
           </div>
 
           <div class="col-lg-6">
@@ -957,7 +872,6 @@
       animateMoney($('resCuota'), c.cuota);
       $('resCuotaSr').textContent = 'Cuota mensual estimada: ' + money(c.cuota);
       $('resRecibe').textContent = money(c.recibe);
-      $('coverAmount').textContent = money(c.recibe);
       $('resTotal').textContent = money(c.total);
       $('resTna').textContent = pct(c.tna, 0);
       $('resCft').textContent = pct(c.cft, 1);
