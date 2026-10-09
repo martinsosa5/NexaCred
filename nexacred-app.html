@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NexaCred | Panel del sistema</title>
+  <meta name="description" content="Demostración funcional del sistema NexaCred: gestión de solicitudes de crédito, scoring de riesgo, verificación presencial, cartera y portal del cliente.">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232f6fd1'/%3E%3Ctext x='32' y='43' font-size='28' font-family='Arial, sans-serif' font-weight='700' fill='%23ffffff' text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E">
+
+  <!-- Bootstrap 5 (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome (CDN) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* =========================================================
+       1. TOKENS — tema CLARO (esta es la app en uso, no el sitio)
+       ========================================================= */
+    :root{
+      --bg-page:#f4f7fb;
+      --bg-surface:#ffffff;
+      --border:#e3e8f0;
+      --text-hi:#161f2e;
+      --text-mid:#5b6472;
+      --text-low:#8a93a3;
+      --blue:#2f6fd1;
+      --blue-dark:#1f4f9e;
+      --cyan:#00b8d9;
+      --gradient: linear-gradient(135deg, var(--cyan), var(--blue));
+      --success:#178a4c; --success-bg:#e7f7ee;
+      --warning:#b7791f; --warning-bg:#fff6e0;
+      --danger:#c53030;  --danger-bg:#fdeaea;
+      --info:#0e7c9c;    --info-bg:#e6f7fb;
+      --radius-lg:16px; --radius-md:10px;
+      --shadow-sm: 0 1px 2px rgba(16,24,40,.06);
+      --shadow-md: 0 10px 28px -10px rgba(16,24,40,.14);
+      --ease: cubic-bezier(.22,.61,.36,1);
+      --sidebar-w: 250px;
+    }
+    *{ box-sizing:border-box; }
+    body{ background:var(--bg-page); color:var(--text-mid); font-family:'Inter',sans-serif; font-size:.95rem; margin:0; }
+    h1,h2,h3,h4{ font-family:'Space Grotesk',sans-serif; color:var(--text-hi); letter-spacing:-0.01em; margin:0; }
+    a{ text-decoration:none; }
+    :focus-visible{ outline:2px solid var(--blue); outline-offset:2px; border-radius:4px; }
+    .text-gradient{ background:var(--gradient); -webkit-background-clip:text; background-clip:text; color:transparent; }
+
+    /* =========================================================
+       2. BOTONES
+       ========================================================= */
+    .btn-primary-nexa{ background:var(--gradient); color:#fff; border:none; padding:.65rem 1.3rem; border-radius:10px; font-weight:600; font-size:.88rem; transition:all .25s var(--ease); box-shadow:0 6px 16px -6px rgba(47,111,209,.45); }
+    .btn-primary-nexa:hover{ transform:translateY(-2px); box-shadow:0 10px 22px -6px rgba(47,111,209,.55); color:#fff; }
+    .btn-primary-nexa:disabled{ opacity:.4; cursor:not-allowed; transform:none; box-shadow:none; }
+    .btn-outline-nexa{ background:#fff; color:var(--blue-dark); border:1.5px solid #d7e2f3; padding:.6rem 1.2rem; border-radius:10px; font-weight:600; font-size:.85rem; transition:all .25s var(--ease); }
+    .btn-outline-nexa:hover{ border-color:var(--blue); background:#f3f8ff; color:var(--blue-dark); }
+    .btn-sm-nexa{ padding:.32rem .7rem; font-size:.76rem; border-radius:8px; white-space:nowrap; }
+    .btn-success-nexa{ background:#fff; border:1.5px solid #bfe8d2; color:var(--success); font-weight:600; transition:all .2s; }
+    .btn-success-nexa:hover{ background:var(--success-bg); }
+    .btn-danger-nexa{ background:#fff; border:1.5px solid #f6c6c6; color:var(--danger); font-weight:600; transition:all .2s; }
+    .btn-danger-nexa:hover{ background:var(--danger-bg); }
+    .btn-ghost-nexa{ background:transparent; border:none; color:var(--text-mid); font-size:.8rem; font-weight:500; padding:.3rem .6rem; border-radius:6px; }
+    .btn-ghost-nexa:hover{ background:#f1f5fb; color:var(--blue-dark); }
+
+    .form-control, .form-select{ border-radius:10px; border-color:var(--border); font-size:.88rem; }
+    .form-control:focus, .form-select:focus{ border-color:var(--blue); box-shadow:0 0 0 .2rem rgba(47,111,209,.15); }
+    .form-label{ font-size:.8rem; font-weight:600; color:var(--text-hi); }
+
+    /* =========================================================
+       3. LAYOUT: sidebar + topbar + main
+       ========================================================= */
+    .app-shell{ display:flex; min-height:100vh; }
+
+    .app-sidebar{
+      width:var(--sidebar-w); flex-shrink:0;
+      background:#fff; border-right:1px solid var(--border);
+      display:flex; flex-direction:column;
+      position:fixed; top:0; left:0; bottom:0; z-index:1040;
+      transition: transform .3s var(--ease);
+    }
+    .sidebar-brand{ display:flex; align-items:center; gap:.6rem; padding:1.3rem 1.3rem 1rem; }
+    .sidebar-brand .brand-icon{ width:34px; height:34px; border-radius:9px; display:grid; place-items:center; background:var(--gradient); color:#fff; font-size:.9rem; flex-shrink:0; }
+    .sidebar-brand span.name{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.05rem; color:var(--text-hi); }
+    .sidebar-section-label{ font-size:.68rem; color:var(--text-low); padding:.6rem 1.3rem .3rem; }
+
+    .side-nav{ list-style:none; margin:0; padding:0; flex:1; overflow-y:auto; }
+    .side-nav a{
+      display:flex; align-items:center; gap:.8rem; padding:.68rem 1rem;
+      border-radius:10px; color:var(--text-mid); font-size:.87rem; font-weight:500;
+      margin:.15rem .8rem; transition:all .2s var(--ease); cursor:pointer;
+    }
+    .side-nav a i{ width:18px; text-align:center; color:var(--text-low); font-size:.92rem; }
+    .side-nav a:hover{ background:#f1f5fb; color:var(--text-hi); }
+    .side-nav a.active{ background:linear-gradient(135deg, rgba(0,184,217,.10), rgba(47,111,209,.10)); color:var(--blue-dark); font-weight:600; }
+    .side-nav a.active i{ color:var(--blue); }
+    .nav-badge{ margin-left:auto; background:var(--blue); color:#fff; font-size:.65rem; font-weight:700; padding:.05rem .42rem; border-radius:999px; min-width:18px; text-align:center; }
+    .nav-badge.hidden-badge{ display:none; }
+    .nav-divider{ height:1px; background:var(--border); margin:.6rem 1.3rem; }
+
+    .sidebar-user{ padding:1rem 1.3rem; border-top:1px solid var(--border); display:flex; align-items:center; gap:.7rem; }
+    .sidebar-user .user-avatar{ width:36px; height:36px; border-radius:50%; background:var(--gradient); color:#fff; display:grid; place-items:center; font-weight:700; font-size:.78rem; font-family:'Space Grotesk',sans-serif; flex-shrink:0; }
+    .sidebar-user .user-name{ font-size:.82rem; font-weight:600; color:var(--text-hi); }
+    .sidebar-user .user-role{ font-size:.7rem; color:var(--text-low); }
+    .sidebar-user button{ margin-left:auto; background:none; border:none; color:var(--text-low); font-size:.9rem; }
+    .sidebar-user button:hover{ color:var(--danger); }
+
+    .sidebar-backdrop{ position:fixed; inset:0; background:rgba(15,23,42,.4); z-index:1035; display:none; }
+    .sidebar-backdrop.show{ display:block; }
+
+    .app-content{ margin-left:var(--sidebar-w); flex:1; min-width:0; display:flex; flex-direction:column; }
+
+    .app-topbar{
+      position:sticky; top:0; z-index:1020;
+      background:rgba(255,255,255,.92); backdrop-filter:blur(10px);
+      border-bottom:1px solid var(--border);
+      padding:1rem 1.8rem;
+      display:flex; align-items:center; justify-content:space-between; gap:1rem;
+    }
+    .topbar-left{ display:flex; align-items:center; gap:1rem; min-width:0; }
+    #sidebarToggle{ background:none; border:1px solid var(--border); border-radius:8px; width:36px; height:36px; color:var(--text-mid); }
+    .topbar-sub{ font-size:.76rem; color:var(--text-low); }
+    .topbar-right{ display:flex; align-items:center; gap:.6rem; }
+    .icon-btn{ width:38px; height:38px; border-radius:10px; border:1px solid var(--border); background:#fff; color:var(--text-mid); display:grid; place-items:center; position:relative; }
+    .icon-btn:hover{ background:#f4f7fb; }
+    .icon-dot{ position:absolute; top:6px; right:7px; width:7px; height:7px; border-radius:50%; background:var(--danger); }
+    .topbar-avatar{ width:38px; height:38px; border-radius:50%; background:var(--gradient); color:#fff; display:grid; place-items:center; font-weight:700; font-size:.78rem; font-family:'Space Grotesk',sans-serif; }
+
+    .app-main{ padding:1.8rem; flex:1; }
+    .app-view h2{ font-size:1.35rem; margin-bottom:.3rem; }
+    .view-subtitle{ font-size:.86rem; color:var(--text-mid); margin-bottom:1.6rem; }
+
+    @media (max-width: 991px){
+      .app-sidebar{ transform:translateX(-100%); }
+      .app-sidebar.open{ transform:translateX(0); }
+      .app-content{ margin-left:0; }
+      .app-main{ padding:1.2rem; }
+    }
+
+    /* =========================================================
+       4. TARJETAS / TABLAS / BADGES (compartido entre vistas)
+       ========================================================= */
+    .card-surface{ background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); padding:1.4rem; }
+
+    .kpi-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:1rem; margin-bottom:1.6rem; }
+    .kpi-card{ background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.3rem 1.4rem; box-shadow:var(--shadow-sm); }
+    .kpi-icon{ width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg, rgba(0,184,217,.12), rgba(47,111,209,.12)); display:grid; place-items:center; color:var(--blue); margin-bottom:.8rem; }
+    .kpi-label{ font-size:.78rem; color:var(--text-low); }
+    .kpi-value{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.55rem; color:var(--text-hi); margin:.15rem 0; }
+    .kpi-delta{ font-size:.74rem; font-weight:600; }
+    .kpi-delta.up{ color:var(--success); } .kpi-delta.down{ color:var(--danger); }
+
+    .chart-bars{ display:flex; align-items:flex-end; gap:10px; height:150px; }
+    .chart-bars span{ flex:1; border-radius:5px 5px 0 0; background:var(--gradient); transition:height .6s var(--ease); min-height:4px; }
+
+    .pill{ display:inline-block; padding:.26rem .7rem; border-radius:999px; font-size:.74rem; font-weight:600; white-space:nowrap; }
+    .pill-warning{ background:var(--warning-bg); color:var(--warning); }
+    .pill-info{ background:var(--info-bg); color:var(--info); }
+    .pill-success{ background:var(--success-bg); color:var(--success); }
+    .pill-danger{ background:var(--danger-bg); color:var(--danger); }
+
+    .app-data-table{ width:100%; border-collapse:collapse; font-size:.85rem; }
+    .app-data-table th{ text-align:left; font-size:.72rem; color:var(--text-low); font-weight:600; padding:.75rem .9rem; border-bottom:1px solid var(--border); background:#fafbfd; }
+    .app-data-table td{ padding:.75rem .9rem; border-bottom:1px solid var(--border); color:var(--text-mid); vertical-align:middle; }
+    .app-data-table tr:last-child td{ border-bottom:none; }
+    .app-data-table tbody tr:hover td{ background:#f8fafc; }
+    td.cliente-cell{ color:var(--text-hi); font-weight:600; }
+    .actions-cell{ display:flex; gap:.4rem; flex-wrap:wrap; }
+    .table-wrap{ overflow-x:auto; }
+
+    /* =========================================================
+       5. SOLICITUDES: toolbar
+       ========================================================= */
+    .table-toolbar{ display:flex; flex-wrap:wrap; gap:.8rem; align-items:center; justify-content:space-between; margin-bottom:1.1rem; }
+    .search-box{ position:relative; flex:1; min-width:220px; max-width:340px; }
+    .search-box i{ position:absolute; left:.8rem; top:50%; transform:translateY(-50%); color:var(--text-low); font-size:.85rem; }
+    .search-box input{ width:100%; padding:.55rem .8rem .55rem 2.2rem; border:1px solid var(--border); border-radius:10px; font-size:.85rem; }
+    .search-box input:focus{ outline:none; border-color:var(--blue); box-shadow:0 0 0 .2rem rgba(47,111,209,.12); }
+    .filter-pills{ display:flex; gap:.4rem; flex-wrap:wrap; }
+    .filter-pill{ font-size:.78rem; padding:.4rem .9rem; border-radius:999px; border:1px solid var(--border); background:#fff; color:var(--text-mid); cursor:pointer; transition:all .2s; }
+    .filter-pill.active{ background:var(--gradient); color:#fff; border-color:transparent; font-weight:600; }
+
+    /* =========================================================
+       6. SCORING DE RIESGO
+       ========================================================= */
+    .risk-profile{ display:flex; align-items:center; gap:.9rem; margin-bottom:1.2rem; }
+    .risk-avatar{ width:46px; height:46px; border-radius:50%; background:var(--gradient); color:#fff; display:grid; place-items:center; font-weight:700; font-family:'Space Grotesk',sans-serif; font-size:.88rem; flex-shrink:0; }
+    .risk-profile .name{ color:var(--text-hi); font-weight:600; font-size:.92rem; }
+    .risk-profile .meta{ font-size:.78rem; color:var(--text-low); }
+    .score-meter{ background:#f8fafc; border:1px solid var(--border); border-radius:12px; padding:1.1rem 1.2rem; margin-bottom:1.1rem; }
+    .score-top{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:.6rem; }
+    .score-value{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.7rem; color:var(--text-hi); }
+    .score-tag{ font-size:.76rem; font-weight:600; padding:.25rem .7rem; border-radius:999px; }
+    .score-bar{ height:9px; border-radius:999px; background:#e9edf3; overflow:hidden; }
+    .score-fill{ height:100%; background:var(--gradient); border-radius:999px; transition:width .8s var(--ease); }
+    .risk-factors{ list-style:none; padding:0; margin:0 0 1.1rem; border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+    .risk-factors li{ display:flex; gap:.7rem; align-items:center; padding:.65rem .9rem; font-size:.85rem; color:var(--text-mid); border-bottom:1px solid var(--border); background:#fff; }
+    .risk-factors li:last-child{ border-bottom:none; }
+    .risk-factors i.ok{ color:var(--success); } .risk-factors i.warn{ color:var(--warning); }
+    .risk-recommendation{ background:var(--info-bg); border:1px solid #b7e3ef; border-radius:12px; padding:.85rem 1rem; font-size:.85rem; color:var(--text-hi); }
+
+    /* =========================================================
+       7. VERIFICACIÓN PRESENCIAL Y FIRMA
+       ========================================================= */
+    .branch-header{ display:flex; flex-wrap:wrap; justify-content:space-between; gap:.5rem; padding-bottom:.9rem; margin-bottom:1rem; border-bottom:1px solid var(--border); font-size:.85rem; color:var(--text-hi); }
+    .checklist-verify{ list-style:none; padding:0; margin:0 0 1.2rem; }
+    .checklist-verify li{ display:flex; gap:.7rem; align-items:center; padding:.7rem 0; font-size:.87rem; border-bottom:1px solid var(--border); }
+    .checklist-verify li:last-child{ border-bottom:none; }
+    .checklist-verify input[type="checkbox"]{ width:18px; height:18px; accent-color:var(--blue); cursor:pointer; flex-shrink:0; }
+    .checklist-verify label{ cursor:pointer; color:var(--text-mid); }
+    .signature-wrap{ border:1.5px dashed #c7d2e0; border-radius:12px; padding:.9rem; margin-bottom:.8rem; background:#fbfcfe; }
+    .signature-wrap canvas{ width:100%; height:130px; touch-action:none; cursor:crosshair; background:#fff; border-radius:8px; border:1px solid var(--border); }
+    .signature-actions{ display:flex; justify-content:space-between; align-items:center; margin-top:.6rem; }
+    .signature-actions span{ font-size:.74rem; color:var(--text-low); }
+    .disburse-note{ font-size:.76rem; color:var(--text-low); text-align:center; margin-top:.6rem; }
+    .verif-empty{ text-align:center; padding:3rem 1rem; color:var(--text-low); }
+    .verif-empty i{ font-size:2.2rem; color:#c7d2e0; margin-bottom:.8rem; display:block; }
+
+    .terms-check{ display:flex; gap:.7rem; align-items:flex-start; background:#f8fafc; border:1px solid var(--border); border-radius:12px; padding:.9rem 1rem; margin-bottom:1rem; }
+    .terms-check input[type="checkbox"]{ width:18px; height:18px; accent-color:var(--blue); cursor:pointer; flex-shrink:0; margin-top:.15rem; }
+    .terms-check label{ font-size:.83rem; line-height:1.5; color:var(--text-mid); cursor:pointer; }
+    .terms-check label a{ color:var(--blue-dark); font-weight:600; text-decoration:underline; }
+    .terms-check label a:hover{ color:var(--blue); }
+    .terms-body{ font-size:.85rem; color:var(--text-mid); max-height:55vh; overflow-y:auto; padding-right:.4rem; }
+    .terms-body h6{ font-size:.86rem; color:var(--text-hi); margin:1rem 0 .4rem; }
+    .terms-body h6:first-child{ margin-top:0; }
+    .terms-body p{ margin:0 0 .7rem; }
+    .terms-body ul{ padding-left:1.1rem; margin:0 0 .7rem; }
+
+    /* =========================================================
+       8. CARTERA Y COBRANZAS
+       ========================================================= */
+    .activity-feed{ list-style:none; padding:0; margin:0; }
+    .activity-feed li{ display:flex; gap:.7rem; padding:.65rem 0; border-bottom:1px solid var(--border); font-size:.82rem; color:var(--text-mid); }
+    .activity-feed li:last-child{ border-bottom:none; }
+    .activity-feed li i{ color:var(--blue); margin-top:.15rem; flex-shrink:0; }
+    .activity-feed .time{ display:block; font-size:.7rem; color:var(--text-low); margin-top:.1rem; }
+
+    /* =========================================================
+       9. PORTAL DEL CLIENTE
+       ========================================================= */
+    .portal-badge{ display:inline-flex; align-items:center; gap:.5rem; background:var(--success-bg); color:var(--success); font-size:.78rem; font-weight:600; padding:.4rem .9rem; border-radius:999px; margin-bottom:1.2rem; }
+    .stepper-track{ display:flex; align-items:center; gap:.5rem; margin-bottom:.6rem; max-width:420px; }
+    .stepper-track .step{ width:30px; height:30px; border-radius:50%; display:grid; place-items:center; font-size:.78rem; font-weight:700; font-family:'Space Grotesk',sans-serif; background:#e9edf3; color:var(--text-low); flex-shrink:0; transition:all .3s; }
+    .stepper-track .step.done{ background:var(--gradient); color:#fff; }
+    .stepper-track .step.active{ background:#fff; border:2px solid var(--blue); color:var(--blue); }
+    .stepper-track .line{ flex:1; height:2px; background:#e9edf3; }
+    .stepper-track .line.done{ background:var(--gradient); }
+    .stepper-labels{ display:flex; justify-content:space-between; font-size:.72rem; color:var(--text-low); margin-bottom:1.6rem; max-width:420px; }
+    .client-step{ max-width:520px; }
+    .upload-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:.8rem; margin-bottom:1.2rem; }
+    .upload-box{ display:flex; flex-direction:column; align-items:center; gap:.5rem; border:1.5px dashed #c7d2e0; border-radius:12px; padding:1.2rem .8rem; text-align:center; font-size:.78rem; color:var(--text-mid); cursor:pointer; transition:all .2s; }
+    .upload-box:hover{ border-color:var(--blue); background:#f6f9ff; }
+    .upload-box.uploaded{ border-style:solid; border-color:#bfe8d2; background:var(--success-bg); }
+    .upload-box i{ font-size:1.4rem; color:var(--blue); }
+    .summary-box{ border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:1.2rem; }
+    .summary-box .dash-row{ display:flex; justify-content:space-between; padding:.7rem 1rem; font-size:.86rem; border-bottom:1px solid var(--border); background:#fff; }
+    .summary-box .dash-row:last-child{ border-bottom:none; }
+    .summary-box .dash-row span:first-child{ color:var(--text-low); }
+    .summary-box .dash-row span:last-child{ color:var(--text-hi); font-weight:600; }
+    .step-nav{ display:flex; justify-content:space-between; gap:.8rem; max-width:520px; }
+    .portal-success{ text-align:center; padding:2.6rem 1rem; }
+    .portal-success i{ font-size:3rem; color:var(--success); margin-bottom:1rem; }
+    .portal-success h3{ font-size:1.3rem; margin-bottom:.5rem; }
+    .portal-success p{ color:var(--text-mid); max-width:460px; margin:0 auto 1.5rem; font-size:.9rem; }
+
+    /* =========================================================
+       10. TOASTS
+       ========================================================= */
+    #toastContainer{ position:fixed; bottom:1.5rem; right:1.5rem; z-index:2000; display:flex; flex-direction:column; gap:.6rem; }
+    .app-toast{ background:#1c2536; color:#fff; padding:.8rem 1.1rem; border-radius:10px; font-size:.85rem; display:flex; align-items:center; gap:.6rem; box-shadow:0 12px 30px -10px rgba(0,0,0,.4); opacity:0; transform:translateY(10px); transition:all .3s var(--ease); max-width:320px; }
+    .app-toast.show{ opacity:1; transform:translateY(0); }
+    .toast-success i{ color:#4ade80; } .toast-info i{ color:#38bdf8; } .toast-warning i{ color:#facc15; } .toast-danger i{ color:#f87171; }
+
+    /* =========================================================
+       11. MODALES (Bootstrap, retocados)
+       ========================================================= */
+    .modal-content{ border-radius:16px; border:none; }
+    .modal-header{ border-bottom:1px solid var(--border); }
+    .modal-footer{ border-top:1px solid var(--border); }
+    .modal-title{ font-family:'Space Grotesk',sans-serif; font-size:1.1rem; }
+
+    @media (prefers-reduced-motion: reduce){
+      *{ transition:none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-shell">
+
+    <!-- =========================================================
+         SIDEBAR
+         ========================================================= -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+    <aside class="app-sidebar" id="appSidebar">
+      <a class="sidebar-brand" href="nexacred-landing.html" title="Volver al sitio de NexaCred">
+        <span class="brand-icon"><i class="fa-solid fa-diagram-project" aria-hidden="true"></i></span>
+        <span class="name">Nexa<span class="text-gradient">Cred</span></span>
+      </a>
+
+      <div class="sidebar-section-label">Módulos</div>
+      <ul class="side-nav">
+        <li><a id="nav-panel" class="active" onclick="switchView('panel')"><i class="fa-solid fa-gauge-high" aria-hidden="true"></i> Panel general</a></li>
+        <li><a id="nav-solicitudes" onclick="switchView('solicitudes')"><i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i> Solicitudes <span class="nav-badge" id="badge-solicitudes">0</span></a></li>
+        <li><a id="nav-scoring" onclick="switchView('scoring')"><i class="fa-solid fa-chart-line" aria-hidden="true"></i> Scoring de riesgo</a></li>
+        <li><a id="nav-verificacion" onclick="switchView('verificacion')"><i class="fa-solid fa-fingerprint" aria-hidden="true"></i> Verificación y firma <span class="nav-badge" id="badge-verificacion">0</span></a></li>
+        <li><a id="nav-cartera" onclick="switchView('cartera')"><i class="fa-solid fa-wallet" aria-hidden="true"></i> Cartera y cobranzas</a></li>
+      </ul>
+
+      <div class="nav-divider"></div>
+      <div class="sidebar-section-label">Vista del cliente</div>
+      <ul class="side-nav">
+        <li><a id="nav-portal" onclick="switchView('portal')"><i class="fa-solid fa-user" aria-hidden="true"></i> Portal del cliente</a></li>
+      </ul>
+
+      <div class="sidebar-user">
+        <div class="user-avatar">AM</div>
+        <div>
+          <div class="user-name">Ana Martínez</div>
+          <div class="user-role">Analista de riesgo</div>
+        </div>
+        <button title="Cerrar sesión (demo)" onclick="showToast('Sesión finalizada (demo).','info')"><i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i></button>
+      </div>
+    </aside>
+
+    <!-- =========================================================
+         CONTENIDO
+         ========================================================= -->
+    <div class="app-content">
+
+      <!-- TOPBAR -->
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <button id="sidebarToggle" class="d-lg-none" onclick="toggleSidebar()"><i class="fa-solid fa-bars" aria-hidden="true"></i></button>
+          <div>
+            <h2 id="topbarTitle">Panel general</h2>
+            <div class="topbar-sub">Financiera Andina · Actualizado hace instantes</div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="dropdown">
+            <button class="icon-btn" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fa-solid fa-bell" aria-hidden="true"></i><span class="icon-dot"></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" style="font-size:.85rem; max-width:280px;">
+              <li><h6 class="dropdown-header">Notificaciones</h6></li>
+              <li><a class="dropdown-item" href="#">Nueva solicitud de Distribuidora Sur SRL</a></li>
+              <li><a class="dropdown-item" href="#">Recordatorio enviado a J. Pérez</a></li>
+              <li><a class="dropdown-item" href="#">Verificación completada para Norma Aguirre</a></li>
+            </ul>
+          </div>
+          <div class="dropdown">
+            <button class="topbar-avatar" data-bs-toggle="dropdown" aria-expanded="false" style="border:none;">AM</button>
+            <ul class="dropdown-menu dropdown-menu-end" style="font-size:.85rem;">
+              <li><a class="dropdown-item" href="#">Mi perfil</a></li>
+              <li><a class="dropdown-item" href="#">Configuración</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#" onclick="showToast('Sesión finalizada (demo).','info')">Cerrar sesión</a></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+
+      <!-- MAIN -->
+      <main class="app-main">
+
+        <!-- ============ PANEL GENERAL ============ -->
+        <section class="app-view" id="view-panel">
+          <h2>Panel general</h2>
+          <p class="view-subtitle">Estado de tu cartera y de la operación, en tiempo real.</p>
+
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-icon"><i class="fa-solid fa-sack-dollar" aria-hidden="true"></i></div>
+              <div class="kpi-label">Cartera activa</div>
+              <div class="kpi-value" id="kpiCartera">$0</div>
+              <div class="kpi-delta up">▲ 4.2% vs. mes anterior</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon"><i class="fa-solid fa-check-double" aria-hidden="true"></i></div>
+              <div class="kpi-label">Tasa de aprobación</div>
+              <div class="kpi-value" id="kpiAprobacion">0%</div>
+              <div class="kpi-delta up">▲ 6.1% vs. mes anterior</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon"><i class="fa-solid fa-chart-line" aria-hidden="true"></i></div>
+              <div class="kpi-label">Score promedio</div>
+              <div class="kpi-value" id="kpiScore">0</div>
+              <div class="kpi-delta up">▲ 1.4% vs. mes anterior</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i></div>
+              <div class="kpi-label">Mora 30+ días</div>
+              <div class="kpi-value" id="kpiMora">0%</div>
+              <div class="kpi-delta down">▼ 0.8% vs. mes anterior</div>
+            </div>
+          </div>
+
+          <div class="row g-4">
+            <div class="col-lg-7">
+              <div class="card-surface">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h3 style="font-size:1rem;">Desembolsos mensuales</h3>
+                  <select class="form-select form-select-sm" style="width:auto;" id="periodoSelect" onchange="renderChart()">
+                    <option value="6m">Últimos 6 meses</option>
+                    <option value="1y">Este año</option>
+                  </select>
+                </div>
+                <div class="chart-bars" id="chartBars"></div>
+              </div>
+            </div>
+            <div class="col-lg-5">
+              <div class="card-surface">
+                <h3 style="font-size:1rem; margin-bottom:.9rem;">Solicitudes recientes</h3>
+                <div id="panelRecent"></div>
+                <button class="btn-outline-nexa w-100 mt-2" onclick="switchView('solicitudes')">Ver todas las solicitudes</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SOLICITUDES DE CRÉDITO ============ -->
+        <section class="app-view" id="view-solicitudes" style="display:none;">
+          <h2>Solicitudes de crédito</h2>
+          <p class="view-subtitle">Buscá, filtrá y resolvé las solicitudes de tus clientes.</p>
+
+          <div class="card-surface">
+            <div class="table-toolbar">
+              <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                <input type="text" id="searchInput" placeholder="Buscar por cliente..." oninput="onSearchInput(this.value)">
+              </div>
+              <div class="filter-pills" id="filterPills">
+                <span class="filter-pill active" data-filter="todas" onclick="setFilter('todas')">Todas</span>
+                <span class="filter-pill" data-filter="pendientes" onclick="setFilter('pendientes')">Pendientes</span>
+                <span class="filter-pill" data-filter="aprobadas" onclick="setFilter('aprobadas')">Aprobadas</span>
+                <span class="filter-pill" data-filter="rechazadas" onclick="setFilter('rechazadas')">Rechazadas</span>
+              </div>
+              <button class="btn-primary-nexa" data-bs-toggle="modal" data-bs-target="#modalNueva"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i> Nueva solicitud</button>
+            </div>
+            <div class="table-wrap">
+              <table class="app-data-table">
+                <thead><tr><th>Cliente</th><th>Monto</th><th>Score</th><th>Fecha</th><th>Estado</th><th>Acciones</th></tr></thead>
+                <tbody id="solicitudesTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SCORING DE RIESGO ============ -->
+        <section class="app-view" id="view-scoring" style="display:none;">
+          <h2>Scoring de riesgo</h2>
+          <p class="view-subtitle">Analizá el perfil crediticio de cada solicitante.</p>
+
+          <div class="row g-4">
+            <div class="col-lg-7">
+              <div class="card-surface">
+                <label class="form-label">Seleccioná una solicitud</label>
+                <select class="form-select mb-3" id="scoringSelect" onchange="onScoringSelect()"></select>
+                <div id="scoringContent"></div>
+              </div>
+            </div>
+            <div class="col-lg-5">
+              <div class="card-surface">
+                <h3 style="font-size:1rem; margin-bottom:.8rem;">Cómo funciona el motor de scoring</h3>
+                <p style="font-size:.86rem;">El modelo combina el historial de pagos, los datos del buró de crédito y la relación cuota-ingreso para sugerir una decisión. Podés recalcular el análisis en cualquier momento; el resultado se actualiza también en el listado de solicitudes.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ VERIFICACIÓN Y FIRMA ============ -->
+        <section class="app-view" id="view-verificacion" style="display:none;">
+          <h2>Verificación presencial y firma</h2>
+          <p class="view-subtitle">Confirmá la identidad del cliente en sucursal antes de desembolsar.</p>
+
+          <div class="row g-4">
+            <div class="col-lg-7">
+              <div class="card-surface">
+                <label class="form-label">Solicitud aprobada a verificar</label>
+                <select class="form-select mb-3" id="verifSelect" onchange="onVerifSelect()"></select>
+                <div id="verifContent"></div>
+              </div>
+            </div>
+            <div class="col-lg-5">
+              <div class="card-surface">
+                <h3 style="font-size:1rem; margin-bottom:.8rem;">Qué se valida en este paso</h3>
+                <ul style="padding-left:1.1rem; font-size:.86rem; margin:0;">
+                  <li class="mb-2">Documentación respaldatoria original (DNI, recibo de sueldo, comprobante de domicilio).</li>
+                  <li class="mb-2">Datos biométricos del titular (huella y/o foto), para prevenir fraude.</li>
+                  <li class="mb-2">Aceptación expresa de los Términos y Condiciones del contrato de crédito.</li>
+                  <li>Firma del contrato. El desembolso se habilita recién cuando los cuatro pasos están completos.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ CARTERA Y COBRANZAS ============ -->
+        <section class="app-view" id="view-cartera" style="display:none;">
+          <h2>Cartera y cobranzas</h2>
+          <p class="view-subtitle">Créditos activos y acciones de cobranza automáticas.</p>
+
+          <div class="row g-4">
+            <div class="col-lg-7">
+              <div class="card-surface">
+                <h3 style="font-size:1rem; margin-bottom:.9rem;">Créditos activos</h3>
+                <div class="table-wrap">
+                  <table class="app-data-table">
+                    <thead><tr><th>Cliente</th><th>Saldo</th><th>Próx. vencimiento</th><th>Estado</th><th>Acción</th></tr></thead>
+                    <tbody id="carteraTableBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-5">
+              <div class="card-surface">
+                <h3 style="font-size:1rem; margin-bottom:.9rem;">Acciones automáticas</h3>
+                <ul class="activity-feed" id="activityFeed"></ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ PORTAL DEL CLIENTE ============ -->
+        <section class="app-view" id="view-portal" style="display:none;">
+          <h2>Portal del cliente</h2>
+          <p class="view-subtitle">Así carga la solicitud tu cliente final, desde su celular o computadora.</p>
+
+          <div class="card-surface">
+            <span class="portal-badge"><i class="fa-solid fa-user" aria-hidden="true"></i> Estás viendo la vista que ve tu cliente</span>
+
+            <div id="portalForm">
+              <div class="stepper-track">
+                <span class="step active">1</span><span class="line"></span>
+                <span class="step">2</span><span class="line"></span>
+                <span class="step">3</span><span class="line"></span>
+                <span class="step">4</span>
+              </div>
+              <div class="stepper-labels"><span>Préstamo</span><span>Datos</span><span>Documentos</span><span>Confirmar</span></div>
+
+              <form id="clientForm" onsubmit="return false;">
+
+                <!-- Paso 1 -->
+                <div class="client-step" id="clientStep1">
+                  <div class="mb-3">
+                    <label class="form-label">Monto solicitado</label>
+                    <input type="number" class="form-control" id="cliMonto" required min="10000" placeholder="Ej: 500000">
+                  </div>
+                  <div class="row g-3 mb-3">
+                    <div class="col-sm-6">
+                      <label class="form-label">Plazo</label>
+                      <select class="form-select" id="cliPlazo">
+                        <option>12 meses</option><option>24 meses</option><option>36 meses</option>
+                      </select>
+                    </div>
+                    <div class="col-sm-6">
+                      <label class="form-label">Motivo del préstamo</label>
+                      <select class="form-select" id="cliMotivo">
+                        <option>Capital de trabajo</option><option>Compra de equipamiento</option><option>Refinanciación</option><option>Otro</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="step-nav"><span></span><button type="button" class="btn-primary-nexa" onclick="nextStep(1)">Siguiente</button></div>
+                </div>
+
+                <!-- Paso 2 -->
+                <div class="client-step" id="clientStep2" style="display:none;">
+                  <div class="row g-3 mb-3">
+                    <div class="col-sm-6">
+                      <label class="form-label">Nombre completo</label>
+                      <input type="text" class="form-control" id="cliNombre" required placeholder="Nombre y apellido">
+                    </div>
+                    <div class="col-sm-6">
+                      <label class="form-label">DNI</label>
+                      <input type="text" class="form-control" id="cliDni" required placeholder="30123456">
+                    </div>
+                  </div>
+                  <div class="row g-3 mb-3">
+                    <div class="col-sm-6">
+                      <label class="form-label">Email</label>
+                      <input type="email" class="form-control" id="cliEmail" required placeholder="nombre@email.com">
+                    </div>
+                    <div class="col-sm-6">
+                      <label class="form-label">Ingreso mensual</label>
+                      <input type="number" class="form-control" id="cliIngreso" placeholder="Ej: 800000">
+                    </div>
+                  </div>
+                  <div class="step-nav"><button type="button" class="btn-outline-nexa" onclick="prevStep(2)">Atrás</button><button type="button" class="btn-primary-nexa" onclick="nextStep(2)">Siguiente</button></div>
+                </div>
+
+                <!-- Paso 3 -->
+                <div class="client-step" id="clientStep3" style="display:none;">
+                  <div class="upload-grid">
+                    <label class="upload-box" id="boxDni">
+                      <input type="file" hidden onchange="handleFileSelect(this,'boxDni','lblDni','DNI (frente y dorso)')">
+                      <i class="fa-solid fa-id-card" aria-hidden="true"></i>
+                      <span id="lblDni">DNI (frente y dorso)</span>
+                    </label>
+                    <label class="upload-box" id="boxRecibo">
+                      <input type="file" hidden onchange="handleFileSelect(this,'boxRecibo','lblRecibo','Recibo de sueldo')">
+                      <i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i>
+                      <span id="lblRecibo">Recibo de sueldo</span>
+                    </label>
+                    <label class="upload-box" id="boxDomicilio">
+                      <input type="file" hidden onchange="handleFileSelect(this,'boxDomicilio','lblDomicilio','Comprobante de domicilio')">
+                      <i class="fa-solid fa-house" aria-hidden="true"></i>
+                      <span id="lblDomicilio">Comprobante de domicilio</span>
+                    </label>
+                  </div>
+                  <div class="step-nav"><button type="button" class="btn-outline-nexa" onclick="prevStep(3)">Atrás</button><button type="button" class="btn-primary-nexa" onclick="nextStep(3)">Siguiente</button></div>
+                </div>
+
+                <!-- Paso 4 -->
+                <div class="client-step" id="clientStep4" style="display:none;">
+                  <div class="summary-box" id="summaryBox"></div>
+                  <div class="client-note" style="background:var(--info-bg); border:1px solid #b7e3ef; border-radius:12px; padding:.85rem 1rem; font-size:.83rem; color:var(--text-hi); margin-bottom:1.2rem; display:flex; gap:.6rem;">
+                    <i class="fa-solid fa-circle-info" aria-hidden="true" style="color:var(--info);"></i>
+                    <span>Si tu préstamo se aprueba, vas a tener que acercarte a la sucursal más cercana con la documentación original para validar tus datos y firmar el contrato.</span>
+                  </div>
+                  <div class="step-nav"><button type="button" class="btn-outline-nexa" onclick="prevStep(4)">Atrás</button><button type="button" class="btn-primary-nexa" onclick="submitClientRequest()">Enviar solicitud</button></div>
+                </div>
+
+              </form>
+            </div>
+
+            <div class="portal-success" id="portalSuccess" style="display:none;">
+              <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+              <h3>¡Solicitud enviada!</h3>
+              <p>Tu número de solicitud es <strong id="portalSuccessId">#0000</strong>. Te vamos a avisar por email en cuanto el análisis esté listo. Si tu crédito se aprueba, vas a tener que acercarte a la sucursal con la documentación original para la verificación final.</p>
+              <button class="btn-outline-nexa" onclick="resetPortal()">Cargar otra solicitud</button>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL: detalle de solicitud
+       ========================================================= -->
+  <div class="modal fade" id="modalDetalle" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Detalle de la solicitud</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body" id="modalDetalleBody"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL: nueva solicitud
+       ========================================================= -->
+  <div class="modal fade" id="modalNueva" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Nueva solicitud</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <form id="nuevaSolicitudForm" onsubmit="handleNuevaSolicitud(event)">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Cliente</label>
+              <input type="text" class="form-control" id="nsCliente" required placeholder="Nombre y apellido o razón social">
+            </div>
+            <div class="row g-3">
+              <div class="col-6">
+                <label class="form-label">Monto solicitado</label>
+                <input type="number" class="form-control" id="nsMonto" required min="1000" placeholder="Ej: 500000">
+              </div>
+              <div class="col-6">
+                <label class="form-label">Plazo</label>
+                <select class="form-select" id="nsPlazo">
+                  <option>12 meses</option><option>24 meses</option><option>36 meses</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn-outline-nexa" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn-primary-nexa">Crear solicitud</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL: términos y condiciones del contrato de crédito
+       ========================================================= -->
+  <div class="modal fade" id="modalTerminos" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fa-solid fa-file-contract me-2" aria-hidden="true"></i>Términos y condiciones del contrato de crédito</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <div class="terms-body" id="termsBody">
+            <h6>1. Objeto del contrato</h6>
+            <p>NexaCred S.R.L., en su carácter de proveedor del sistema, actúa exclusivamente como plataforma tecnológica de gestión. El presente contrato de crédito se celebra entre la entidad financiera prestamista y el cliente solicitante, cuyos datos y condiciones particulares (monto, plazo y tasa) fueron detallados en los pasos anteriores de esta solicitud.</p>
+
+            <h6>2. Verificación de identidad y datos biométricos</h6>
+            <p>El cliente presta su consentimiento libre, expreso e informado para la captura y el tratamiento de sus datos biométricos (huella digital y fotografía) con la única finalidad de validar su identidad y prevenir el fraude, conforme a la Ley de Protección de Datos Personales vigente. Dichos datos se almacenan de forma cifrada y no se comparten con terceros ajenos a la operación crediticia.</p>
+
+            <h6>3. Obligaciones del cliente</h6>
+            <ul>
+              <li>Abonar cada cuota en la fecha de vencimiento indicada en el cronograma de pagos.</li>
+              <li>Mantener actualizados sus datos de contacto y domicilio ante la entidad.</li>
+              <li>Informar de inmediato cualquier cambio significativo en su situación laboral o patrimonial.</li>
+            </ul>
+
+            <h6>4. Consecuencias del incumplimiento</h6>
+            <p>La falta de pago en término podrá generar intereses moratorios, el reporte de la situación a los burós de crédito correspondientes y el inicio de las acciones de cobranza y, eventualmente, legales previstas por la normativa aplicable.</p>
+
+            <h6>5. Firma electrónica y validez</h6>
+            <p>El cliente reconoce que la firma trazada digitalmente en el paso siguiente, junto con la verificación biométrica y documental realizada en sucursal, tiene la misma validez legal que una firma ológrafa, y manifiesta su conformidad plena con el monto, el plazo y las condiciones del préstamo detalladas en el resumen de la solicitud.</p>
+
+            <h6>6. Aceptación</h6>
+            <p>Al tildar la casilla "Acepto los Términos y Condiciones" y firmar en el paso siguiente, el cliente declara haber leído, comprendido y aceptado en su totalidad el presente contrato.</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-outline-nexa" data-bs-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn-primary-nexa" onclick="aceptarTerminosDesdeModal()"><i class="fa-solid fa-check me-1" aria-hidden="true"></i>Aceptar términos</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastContainer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    /* =========================================================
+       ESTADO DE LA APLICACIÓN (en memoria — se reinicia al recargar)
+       ========================================================= */
+    let applications = [
+      { id:1, cliente:'Mariana Fernández',      monto:450000,  score:712, fecha:'02/08/2026', estado:'aprobado',    plazo:'24 meses' },
+      { id:2, cliente:'Comercial Rioja S.A.',    monto:1200000, score:640, fecha:'04/08/2026', estado:'pendiente',   plazo:'36 meses' },
+      { id:3, cliente:'Lucas Gómez',             monto:280000,  score:588, fecha:'05/08/2026', estado:'rechazado',   plazo:'12 meses' },
+      { id:4, cliente:'Norma Aguirre',           monto:860000,  score:701, fecha:'20/07/2026', estado:'desembolsado', plazo:'24 meses', saldo:540000, estadoPago:'al_dia', proximoVencimiento:'15/09/2026' },
+      { id:5, cliente:'Distribuidora Sur SRL',   monto:2100000, score:655, fecha:'07/08/2026', estado:'pendiente',   plazo:'36 meses' },
+      { id:6, cliente:'J. Pérez',                monto:320000,  score:615, fecha:'10/06/2026', estado:'desembolsado', plazo:'12 meses', saldo:198000, estadoPago:'atrasado', proximoVencimiento:'28/08/2026' },
+      { id:7, cliente:'L. Ibáñez',               monto:500000,  score:690, fecha:'02/07/2026', estado:'desembolsado', plazo:'24 meses', saldo:410000, estadoPago:'al_dia', proximoVencimiento:'18/09/2026' }
+    ];
+    let nextId = 8;
+    let activityLog = [
+      { icon:'fa-bell', text:'Recordatorio de pago enviado a J. Pérez', time:'Hace 2 días' },
+      { icon:'fa-file-signature', text:'Plan de pago propuesto a M. López', time:'Hace 1 día' }
+    ];
+
+    let currentFilter = 'todas';
+    let currentSearch = '';
+    let currentScoringId = null;
+    let currentVerifId = null;
+    let clientStep = 1;
+
+    /* =========================================================
+       UTILIDADES
+       ========================================================= */
+    function formatMonto(n){ return '$' + Number(n||0).toLocaleString('es-AR'); }
+    function getInitials(name){ return name.split(' ').filter(Boolean).map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
+
+    function showToast(message, type){
+      type = type || 'success';
+      const container = document.getElementById('toastContainer');
+      const icons = { success:'fa-circle-check', info:'fa-circle-info', warning:'fa-triangle-exclamation', danger:'fa-circle-xmark' };
+      const div = document.createElement('div');
+      div.className = 'app-toast toast-' + type;
+      div.innerHTML = '<i class="fa-solid ' + (icons[type]||icons.info) + '" aria-hidden="true"></i><span>' + message + '</span>';
+      container.appendChild(div);
+      requestAnimationFrame(()=>div.classList.add('show'));
+      setTimeout(()=>{ div.classList.remove('show'); setTimeout(()=>div.remove(),300); }, 3200);
+    }
+
+    function logActivity(icon, text){
+      activityLog.unshift({ icon:icon, text:text, time:'Ahora' });
+      if(activityLog.length > 8) activityLog.pop();
+      renderActivityFeed();
+    }
+
+    /* =========================================================
+       NAVEGACIÓN ENTRE MÓDULOS
+       ========================================================= */
+    const viewKeys = ['panel','solicitudes','scoring','verificacion','cartera','portal'];
+    const viewTitles = { panel:'Panel general', solicitudes:'Solicitudes de crédito', scoring:'Scoring de riesgo', verificacion:'Verificación presencial y firma', cartera:'Cartera y cobranzas', portal:'Portal del cliente' };
+
+    function switchView(name){
+      viewKeys.forEach(v=>{
+        document.getElementById('view-'+v).style.display = (v===name) ? '' : 'none';
+        document.getElementById('nav-'+v).classList.toggle('active', v===name);
+      });
+      document.getElementById('topbarTitle').textContent = viewTitles[name];
+      if(window.innerWidth < 992){ closeSidebarMobile(); }
+    }
+
+    function toggleSidebar(){
+      document.getElementById('appSidebar').classList.toggle('open');
+      document.getElementById('sidebarBackdrop').classList.toggle('show');
+    }
+    function closeSidebarMobile(){
+      document.getElementById('appSidebar').classList.remove('open');
+      document.getElementById('sidebarBackdrop').classList.remove('show');
+    }
+
+    /* =========================================================
+       PANEL GENERAL
+       ========================================================= */
+    function renderChart(){
+      const periodo = document.getElementById('periodoSelect').value;
+      const data = periodo==='6m' ? [38,52,46,64,58,75,70,92] : [45,50,55,48,60,65,70,68,74,80,85,90];
+      document.getElementById('chartBars').innerHTML = data.map(h=>'<span style="height:'+h+'%"></span>').join('');
+    }
+
+    function renderPanelRecent(){
+      const recent = applications.slice(-4).reverse();
+      const badgeFor = a => a.estado==='pendiente' ? '<span class="pill pill-warning">Pendiente</span>'
+                          : a.estado==='aprobado' ? '<span class="pill pill-info">Aprobado</span>'
+                          : a.estado==='desembolsado' ? '<span class="pill pill-success">Desembolsado</span>'
+                          : '<span class="pill pill-danger">Rechazado</span>';
+      document.getElementById('panelRecent').innerHTML = recent.map(a=>
+        '<div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.85rem;">'+
+        '<span style="color:var(--text-hi);font-weight:600;">'+a.cliente+'</span>'+badgeFor(a)+
+        '</div>'
+      ).join('');
+    }
+
+    function updateKPIs(){
+      const activos = applications.filter(a=>a.estado==='desembolsado');
+      const carteraTotal = activos.reduce((s,a)=>s+(a.saldo||0),0);
+      const atrasados = activos.filter(a=>a.estadoPago==='atrasado').length;
+      const moraPct = activos.length ? ((atrasados/activos.length)*100).toFixed(1) : '0.0';
+      const aprobadasOK = applications.filter(a=>a.estado==='aprobado'||a.estado==='desembolsado').length;
+      const totalNoRech = applications.filter(a=>a.estado!=='rechazado').length || 1;
+      const tasaAprobacion = ((aprobadasOK/totalNoRech)*100).toFixed(0);
+      const scores = applications.map(a=>a.score);
+      const scoreProm = scores.length ? Math.round(scores.reduce((s,v)=>s+v,0)/scores.length) : 0;
+
+      document.getElementById('kpiCartera').textContent = formatMonto(carteraTotal);
+      document.getElementById('kpiAprobacion').textContent = tasaAprobacion + '%';
+      document.getElementById('kpiScore').textContent = scoreProm;
+      document.getElementById('kpiMora').textContent = moraPct + '%';
+    }
+
+    function updateSidebarBadges(){
+      const pend = applications.filter(a=>a.estado==='pendiente').length;
+      const aprob = applications.filter(a=>a.estado==='aprobado').length;
+      const b1 = document.getElementById('badge-solicitudes');
+      const b2 = document.getElementById('badge-verificacion');
+      b1.textContent = pend; b1.classList.toggle('hidden-badge', pend===0);
+      b2.textContent = aprob; b2.classList.toggle('hidden-badge', aprob===0);
+    }
+
+    /* =========================================================
+       SOLICITUDES DE CRÉDITO
+       ========================================================= */
+    function setFilter(f){
+      currentFilter = f;
+      document.querySelectorAll('#filterPills .filter-pill').forEach(p=>p.classList.toggle('active', p.dataset.filter===f));
+      renderSolicitudesTable();
+    }
+    function onSearchInput(v){ currentSearch = v; renderSolicitudesTable(); }
+
+    function renderSolicitudesTable(){
+      let list = applications.slice();
+      if(currentFilter==='pendientes') list = list.filter(a=>a.estado==='pendiente');
+      else if(currentFilter==='aprobadas') list = list.filter(a=>a.estado==='aprobado'||a.estado==='desembolsado');
+      else if(currentFilter==='rechazadas') list = list.filter(a=>a.estado==='rechazado');
+      const term = currentSearch.trim().toLowerCase();
+      if(term) list = list.filter(a=>a.cliente.toLowerCase().includes(term));
+
+      const tbody = document.getElementById('solicitudesTableBody');
+      if(list.length===0){
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4" style="color:var(--text-low);">No se encontraron solicitudes.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = list.slice().reverse().map(renderSolicitudRow).join('');
+    }
+
+    function renderSolicitudRow(a){
+      let badge, actions;
+      if(a.estado==='pendiente'){
+        badge = '<span class="pill pill-warning">Pendiente</span>';
+        actions = '<button class="btn-sm-nexa btn-outline-nexa" onclick="showDetalle('+a.id+')">Ver</button>'+
+                  '<button class="btn-sm-nexa btn-success-nexa" onclick="approveApp('+a.id+')">Aprobar</button>'+
+                  '<button class="btn-sm-nexa btn-danger-nexa" onclick="rejectApp('+a.id+')">Rechazar</button>';
+      } else if(a.estado==='aprobado'){
+        badge = '<span class="pill pill-info">Aprobado</span>';
+        actions = '<button class="btn-sm-nexa btn-outline-nexa" onclick="showDetalle('+a.id+')">Ver</button>'+
+                  '<button class="btn-sm-nexa btn-outline-nexa" onclick="switchView(\'verificacion\')"><i class="fa-solid fa-fingerprint"></i> Verificar</button>';
+      } else if(a.estado==='desembolsado'){
+        badge = '<span class="pill pill-success">Desembolsado</span>';
+        actions = '<button class="btn-sm-nexa btn-outline-nexa" onclick="showDetalle('+a.id+')">Ver</button>';
+      } else {
+        badge = '<span class="pill pill-danger">Rechazado</span>';
+        actions = '<button class="btn-sm-nexa btn-outline-nexa" onclick="showDetalle('+a.id+')">Ver</button>';
+      }
+      return '<tr>'+
+        '<td class="cliente-cell">'+a.cliente+'</td>'+
+        '<td>'+formatMonto(a.monto)+'</td>'+
+        '<td>'+a.score+'</td>'+
+        '<td>'+a.fecha+'</td>'+
+        '<td>'+badge+'</td>'+
+        '<td class="actions-cell">'+actions+'</td>'+
+        '</tr>';
+    }
+
+    function approveApp(id){
+      const app = applications.find(a=>a.id===id); if(!app) return;
+      app.estado = 'aprobado';
+      logActivity('fa-thumbs-up', 'Solicitud de '+app.cliente+' aprobada — pendiente de verificación presencial');
+      showToast('Solicitud de '+app.cliente+' aprobada.', 'success');
+      renderSolicitudesTable(); updateSidebarBadges(); updateKPIs(); renderVerifOptions(); renderPanelRecent();
+    }
+    function rejectApp(id){
+      const app = applications.find(a=>a.id===id); if(!app) return;
+      app.estado = 'rechazado';
+      logActivity('fa-thumbs-down', 'Solicitud de '+app.cliente+' rechazada');
+      showToast('Solicitud de '+app.cliente+' rechazada.', 'danger');
+      renderSolicitudesTable(); updateSidebarBadges(); updateKPIs(); renderPanelRecent();
+    }
+
+    function showDetalle(id){
+      const app = applications.find(a=>a.id===id); if(!app) return;
+      const estadoLabel = { pendiente:'Pendiente de revisión', aprobado:'Aprobado — pendiente de verificación', desembolsado:'Desembolsado', rechazado:'Rechazado' }[app.estado];
+      document.getElementById('modalDetalleBody').innerHTML =
+        '<div class="d-flex align-items-center gap-3 mb-3">'+
+          '<div class="risk-avatar">'+getInitials(app.cliente)+'</div>'+
+          '<div><div style="color:var(--text-hi);font-weight:700;">'+app.cliente+'</div>'+
+          '<div style="font-size:.8rem;color:var(--text-low);">Solicitud #'+String(app.id).padStart(4,'0')+' · '+app.fecha+'</div></div>'+
+        '</div>'+
+        '<div class="summary-box">'+
+          '<div class="dash-row"><span>Monto solicitado</span><span>'+formatMonto(app.monto)+'</span></div>'+
+          '<div class="dash-row"><span>Plazo</span><span>'+(app.plazo||'—')+'</span></div>'+
+          '<div class="dash-row"><span>Score</span><span>'+app.score+'</span></div>'+
+          '<div class="dash-row"><span>Estado</span><span>'+estadoLabel+'</span></div>'+
+        '</div>'+
+        '<h6 style="font-size:.85rem;color:var(--text-hi);margin-bottom:.6rem;">Documentación cargada</h6>'+
+        '<ul class="risk-factors">'+
+          '<li><i class="fa-solid fa-circle-check ok"></i> DNI (frente y dorso)</li>'+
+          '<li><i class="fa-solid fa-circle-check ok"></i> Recibo de sueldo</li>'+
+          '<li><i class="fa-solid fa-circle-check ok"></i> Comprobante de domicilio</li>'+
+          (app.terminosAceptados ? '<li><i class="fa-solid fa-circle-check ok"></i> Términos y condiciones aceptados y firma confirmada</li>' : '')+
+        '</ul>';
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('modalDetalle')).show();
+    }
+
+    function handleNuevaSolicitud(event){
+      event.preventDefault();
+      const cliente = document.getElementById('nsCliente').value.trim();
+      const monto = Number(document.getElementById('nsMonto').value);
+      const plazo = document.getElementById('nsPlazo').value;
+      if(!cliente || !monto) return;
+      createApplication({ cliente:cliente, monto:monto, plazo:plazo });
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('modalNueva')).hide();
+      document.getElementById('nuevaSolicitudForm').reset();
+      showToast('Solicitud creada correctamente.', 'success');
+    }
+
+    function createApplication(data){
+      const id = nextId++;
+      const score = Math.floor(550 + Math.random()*300);
+      const today = new Date().toLocaleDateString('es-AR');
+      const app = { id:id, cliente:data.cliente, monto:Number(data.monto)||0, score:score, fecha:today, estado:'pendiente', plazo:data.plazo||'—' };
+      applications.push(app);
+      logActivity('fa-file-circle-plus', 'Nueva solicitud cargada: '+app.cliente+' ('+formatMonto(app.monto)+')');
+      renderSolicitudesTable(); renderScoringOptions(); renderPanelRecent(); updateSidebarBadges(); updateKPIs();
+      return app;
+    }
+
+    /* =========================================================
+       SCORING DE RIESGO
+       ========================================================= */
+    function renderScoringOptions(){
+      const select = document.getElementById('scoringSelect');
+      const prev = select.value;
+      select.innerHTML = applications.map(a=>'<option value="'+a.id+'">'+a.cliente+' — Solicitud #'+String(a.id).padStart(4,'0')+'</option>').join('');
+      if(applications.some(a=>String(a.id)===prev)){ select.value = prev; }
+      currentScoringId = Number(select.value) || (applications[0] ? applications[0].id : null);
+    }
+    function onScoringSelect(){
+      currentScoringId = Number(document.getElementById('scoringSelect').value);
+      renderScoring();
+    }
+    function getFactors(app){
+      const factors = [];
+      factors.push({ ok: true, text:'Historial de pago: bueno' });
+      factors.push({ ok: app.score>=600, text:'Buró de crédito: '+(app.score>=600?'sin deudas activas':'deudas menores registradas') });
+      factors.push({ ok: app.score>=650, text:'Relación cuota-ingreso: '+(app.score>=650?'28%':'41%') });
+      factors.push({ ok: app.score>=700, text:'Antigüedad laboral: '+(app.score>=700?'4 años':'1 año') });
+      return factors;
+    }
+    function renderScoring(){
+      const app = applications.find(a=>a.id===currentScoringId);
+      const content = document.getElementById('scoringContent');
+      if(!app){ content.innerHTML = '<div class="verif-empty"><i class="fa-solid fa-inbox"></i>No hay solicitudes para analizar.</div>'; return; }
+
+      const riesgo = app.score>=700 ? {label:'Riesgo bajo', color:'success'} : app.score>=600 ? {label:'Riesgo medio', color:'warning'} : {label:'Riesgo alto', color:'danger'};
+      const recomendacion = app.score>=700 ? 'Aprobar con tasa estándar.' : app.score>=600 ? 'Aprobar con garantías adicionales o tasa ajustada.' : 'Requiere revisión manual antes de aprobar.';
+      const factors = getFactors(app);
+
+      content.innerHTML =
+        '<div class="risk-profile"><div class="risk-avatar">'+getInitials(app.cliente)+'</div>'+
+        '<div><div class="name">'+app.cliente+'</div><div class="meta">Solicitud #'+String(app.id).padStart(4,'0')+' · '+formatMonto(app.monto)+'</div></div></div>'+
+        '<div class="score-meter"><div class="score-top"><span class="score-value">'+app.score+'</span>'+
+        '<span class="score-tag" style="background:var(--'+riesgo.color+'-bg);color:var(--'+riesgo.color+');">'+riesgo.label+'</span></div>'+
+        '<div class="score-bar"><div class="score-fill" style="width:'+Math.min(100,Math.round(app.score/10))+'%;"></div></div></div>'+
+        '<ul class="risk-factors">'+factors.map(f=>'<li><i class="fa-solid '+(f.ok?'fa-circle-check ok':'fa-triangle-exclamation warn')+'"></i> '+f.text+'</li>').join('')+'</ul>'+
+        '<div class="risk-recommendation"><i class="fa-solid fa-lightbulb me-1"></i> Recomendación del sistema: '+recomendacion+'</div>'+
+        '<button class="btn-outline-nexa mt-3" onclick="recalcularScore()"><i class="fa-solid fa-arrows-rotate me-1"></i> Actualizar análisis</button>';
+    }
+    function recalcularScore(){
+      const app = applications.find(a=>a.id===currentScoringId); if(!app) return;
+      const delta = Math.floor(Math.random()*16)-8;
+      app.score = Math.max(300, Math.min(990, app.score+delta));
+      logActivity('fa-arrows-rotate', 'Score recalculado para '+app.cliente+': '+app.score);
+      showToast('Análisis actualizado.', 'info');
+      renderScoring(); renderSolicitudesTable(); renderPanelRecent(); updateKPIs();
+    }
+
+    /* =========================================================
+       VERIFICACIÓN PRESENCIAL Y FIRMA (con firma dibujable)
+       ========================================================= */
+    let sigCtx = null, drawing = false, hasSignature = false;
+
+    function renderVerifOptions(){
+      const select = document.getElementById('verifSelect');
+      const aprobadas = applications.filter(a=>a.estado==='aprobado');
+      if(aprobadas.length===0){
+        select.innerHTML = '<option value="">No hay solicitudes pendientes de verificación</option>';
+        select.disabled = true;
+        currentVerifId = null;
+        renderVerifContent();
+        return;
+      }
+      select.disabled = false;
+      const prev = select.value;
+      select.innerHTML = aprobadas.map(a=>'<option value="'+a.id+'">'+a.cliente+' — '+formatMonto(a.monto)+'</option>').join('');
+      if(aprobadas.some(a=>String(a.id)===prev)){ select.value = prev; currentVerifId = Number(prev); }
+      else { currentVerifId = aprobadas[0].id; select.value = currentVerifId; }
+      renderVerifContent();
+    }
+    function onVerifSelect(){
+      currentVerifId = Number(document.getElementById('verifSelect').value);
+      renderVerifContent();
+    }
+
+    function renderVerifContent(){
+      const container = document.getElementById('verifContent');
+      const app = applications.find(a=>a.id===currentVerifId);
+      if(!app){
+        container.innerHTML = '<div class="verif-empty"><i class="fa-solid fa-clipboard-check"></i>No hay créditos aprobados esperando verificación en este momento.</div>';
+        return;
+      }
+      container.innerHTML =
+        '<div class="branch-header"><div><strong>Sucursal Centro</strong> · Turno 10:30 hs</div><div>Cliente: '+app.cliente+'</div></div>'+
+        '<ul class="checklist-verify">'+
+          '<li><input type="checkbox" id="chkDocs" onchange="updateVerifButton()"><label for="chkDocs">Documentación respaldatoria validada (DNI, recibo de sueldo, comprobante de domicilio)</label></li>'+
+          '<li><input type="checkbox" id="chkBio" onchange="updateVerifButton()"><label for="chkBio">Datos biométricos capturados (huella digital y foto)</label></li>'+
+        '</ul>'+
+        '<div class="signature-wrap">'+
+          '<canvas id="signatureCanvas" width="600" height="140"></canvas>'+
+          '<div class="signature-actions"><span>Firmá dentro del recuadro</span><button type="button" class="btn-ghost-nexa" onclick="clearSignature()"><i class="fa-solid fa-eraser me-1"></i>Limpiar firma</button></div>'+
+        '</div>'+
+        '<div class="terms-check">'+
+          '<input type="checkbox" id="chkTerminos" onchange="updateVerifButton()">'+
+          '<label for="chkTerminos">El cliente declara haber leído y acepta los <a href="#" onclick="openTerminos(event)">Términos y Condiciones</a> del contrato de crédito, incluida la autorización para el tratamiento de sus datos biométricos.</label>'+
+        '</div>'+
+        '<button class="btn-primary-nexa w-100" id="btnDesembolsar" disabled onclick="confirmarDesembolso()">Confirmar y desembolsar</button>'+
+        '<p class="disburse-note">El desembolso se habilita automáticamente al completar los cuatro pasos.</p>';
+      setupSignaturePad();
+      hasSignature = false;
+      updateVerifButton();
+    }
+
+    function setupSignaturePad(){
+      const canvas = document.getElementById('signatureCanvas');
+      if(!canvas) return;
+      sigCtx = canvas.getContext('2d');
+      sigCtx.clearRect(0,0,canvas.width,canvas.height);
+
+      function getPos(e){
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width/rect.width, scaleY = canvas.height/rect.height;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x:(clientX-rect.left)*scaleX, y:(clientY-rect.top)*scaleY };
+      }
+      function start(e){ drawing = true; const p = getPos(e); sigCtx.beginPath(); sigCtx.moveTo(p.x,p.y); e.preventDefault(); }
+      function move(e){
+        if(!drawing) return;
+        const p = getPos(e);
+        sigCtx.lineTo(p.x,p.y); sigCtx.strokeStyle = '#2f6fd1'; sigCtx.lineWidth = 2.4; sigCtx.lineCap = 'round'; sigCtx.stroke();
+        hasSignature = true; updateVerifButton(); e.preventDefault();
+      }
+      function end(){ drawing = false; }
+
+      canvas.onmousedown = start; canvas.onmousemove = move; window.onmouseup = end;
+      canvas.ontouchstart = start; canvas.ontouchmove = move; canvas.ontouchend = end;
+    }
+    function clearSignature(){
+      if(!sigCtx) return;
+      const canvas = document.getElementById('signatureCanvas');
+      sigCtx.clearRect(0,0,canvas.width,canvas.height);
+      hasSignature = false; updateVerifButton();
+    }
+    function updateVerifButton(){
+      const btn = document.getElementById('btnDesembolsar');
+      if(!btn) return;
+      const chk1 = document.getElementById('chkDocs'); const chk2 = document.getElementById('chkBio'); const chk3 = document.getElementById('chkTerminos');
+      btn.disabled = !(chk1 && chk1.checked && chk2 && chk2.checked && chk3 && chk3.checked && hasSignature && currentVerifId);
+    }
+    function openTerminos(e){
+      if(e) e.preventDefault();
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('modalTerminos')).show();
+    }
+    function aceptarTerminosDesdeModal(){
+      const chk = document.getElementById('chkTerminos');
+      if(chk){ chk.checked = true; updateVerifButton(); }
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('modalTerminos')).hide();
+      showToast('Términos y condiciones aceptados.', 'success');
+    }
+    function confirmarDesembolso(){
+      const app = applications.find(a=>a.id===currentVerifId); if(!app) return;
+      app.estado = 'desembolsado';
+      app.saldo = app.monto;
+      app.estadoPago = 'al_dia';
+      app.terminosAceptados = true;
+      const venc = new Date(); venc.setDate(venc.getDate()+30);
+      app.proximoVencimiento = venc.toLocaleDateString('es-AR');
+      logActivity('fa-circle-check', 'Crédito desembolsado a '+app.cliente+' ('+formatMonto(app.monto)+') — términos aceptados y firma confirmada');
+      showToast('Crédito desembolsado a '+app.cliente+' correctamente.', 'success');
+      renderVerifOptions(); renderSolicitudesTable(); renderCartera(); updateSidebarBadges(); updateKPIs(); renderPanelRecent();
+    }
+
+    /* =========================================================
+       CARTERA Y COBRANZAS
+       ========================================================= */
+    function renderCartera(){
+      const activos = applications.filter(a=>a.estado==='desembolsado');
+      const tbody = document.getElementById('carteraTableBody');
+      if(activos.length===0){
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4" style="color:var(--text-low);">Todavía no hay créditos desembolsados.</td></tr>';
+      } else {
+        tbody.innerHTML = activos.map(a=>{
+          const pill = a.estadoPago==='atrasado' ? '<span class="pill pill-danger">Atrasado</span>' : '<span class="pill pill-success">Al día</span>';
+          const action = a.estadoPago==='atrasado'
+            ? '<button class="btn-sm-nexa btn-outline-nexa" onclick="sendReminder('+a.id+')"><i class="fa-solid fa-bell"></i> Enviar recordatorio</button>'
+            : '<span style="color:var(--text-low);font-size:.78rem;">—</span>';
+          return '<tr><td class="cliente-cell">'+a.cliente+'</td><td>'+formatMonto(a.saldo)+'</td><td>'+(a.proximoVencimiento||'—')+'</td><td>'+pill+'</td><td>'+action+'</td></tr>';
+        }).join('');
+      }
+      renderActivityFeed();
+    }
+    function sendReminder(id){
+      const app = applications.find(a=>a.id===id); if(!app) return;
+      logActivity('fa-bell', 'Recordatorio de pago enviado a '+app.cliente);
+      showToast('Recordatorio enviado a '+app.cliente+'.', 'info');
+      renderCartera();
+    }
+    function renderActivityFeed(){
+      const feed = document.getElementById('activityFeed');
+      if(!feed) return;
+      if(activityLog.length===0){ feed.innerHTML = '<li style="color:var(--text-low);">Sin actividad todavía.</li>'; return; }
+      feed.innerHTML = activityLog.map(e=>'<li><i class="fa-solid '+e.icon+'"></i><span>'+e.text+'<span class="time">'+e.time+'</span></span></li>').join('');
+    }
+
+    /* =========================================================
+       PORTAL DEL CLIENTE
+       ========================================================= */
+    function goToStep(n){
+      clientStep = n;
+      for(let i=1;i<=4;i++){ document.getElementById('clientStep'+i).style.display = (i===n) ? '' : 'none'; }
+      const steps = document.querySelectorAll('.stepper-track .step');
+      steps.forEach((el,idx)=>{
+        const num = idx+1;
+        el.classList.remove('done','active');
+        if(num < n) el.classList.add('done');
+        else if(num === n) el.classList.add('active');
+      });
+      document.querySelectorAll('.stepper-track .line').forEach((el,idx)=>{ el.classList.toggle('done', (idx+1) < n); });
+      if(n===4) renderClientSummary();
+    }
+    function nextStep(current){
+      const stepEl = document.getElementById('clientStep'+current);
+      const required = stepEl.querySelectorAll('[required]');
+      for(const inp of required){
+        if(!inp.value){ inp.focus(); showToast('Completá los campos obligatorios.', 'warning'); return; }
+      }
+      goToStep(current+1);
+    }
+    function prevStep(current){ goToStep(current-1); }
+
+    function handleFileSelect(input, boxId, labelId, baseText){
+      const span = document.getElementById(labelId);
+      const box = document.getElementById(boxId);
+      if(input.files && input.files[0]){
+        span.textContent = input.files[0].name;
+        box.classList.add('uploaded');
+      } else {
+        span.textContent = baseText;
+        box.classList.remove('uploaded');
+      }
+    }
+
+    function renderClientSummary(){
+      const nombre = document.getElementById('cliNombre').value || '—';
+      const dni = document.getElementById('cliDni').value || '—';
+      const monto = document.getElementById('cliMonto').value || '0';
+      const plazo = document.getElementById('cliPlazo').value || '—';
+      const motivo = document.getElementById('cliMotivo').value || '—';
+      document.getElementById('summaryBox').innerHTML =
+        '<div class="dash-row"><span>Solicitante</span><span>'+nombre+'</span></div>'+
+        '<div class="dash-row"><span>DNI</span><span>'+dni+'</span></div>'+
+        '<div class="dash-row"><span>Monto solicitado</span><span>'+formatMonto(Number(monto)||0)+'</span></div>'+
+        '<div class="dash-row"><span>Plazo</span><span>'+plazo+'</span></div>'+
+        '<div class="dash-row"><span>Motivo</span><span>'+motivo+'</span></div>';
+    }
+
+    function submitClientRequest(){
+      const nombre = document.getElementById('cliNombre').value.trim() || 'Cliente sin nombre';
+      const monto = Number(document.getElementById('cliMonto').value) || 0;
+      const plazo = document.getElementById('cliPlazo').value;
+      const app = createApplication({ cliente:nombre, monto:monto, plazo:plazo });
+      document.getElementById('portalForm').style.display = 'none';
+      document.getElementById('portalSuccess').style.display = '';
+      document.getElementById('portalSuccessId').textContent = '#'+String(app.id).padStart(4,'0');
+    }
+    function resetPortal(){
+      document.getElementById('clientForm').reset();
+      document.querySelectorAll('.upload-box').forEach(b=>b.classList.remove('uploaded'));
+      document.getElementById('lblDni').textContent = 'DNI (frente y dorso)';
+      document.getElementById('lblRecibo').textContent = 'Recibo de sueldo';
+      document.getElementById('lblDomicilio').textContent = 'Comprobante de domicilio';
+      goToStep(1);
+      document.getElementById('portalForm').style.display = '';
+      document.getElementById('portalSuccess').style.display = 'none';
+    }
+
+    /* =========================================================
+       INICIALIZACIÓN
+       ========================================================= */
+    function init(){
+      renderSolicitudesTable();
+      renderScoringOptions();
+      renderScoring();
+      renderVerifOptions();
+      renderCartera();
+      renderChart();
+      renderPanelRecent();
+      updateKPIs();
+      updateSidebarBadges();
+      switchView('panel');
+    }
+    init();
+  </script>
+</body>
+</html>

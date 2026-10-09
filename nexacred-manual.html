@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manual del sistema | NexaCred</title>
+  <meta name="description" content="Recorrido interactivo por los módulos del sistema NexaCred: solicitudes de crédito, scoring de riesgo, verificación presencial, cartera, cobranzas y el portal del cliente.">
+  <meta name="theme-color" content="#0a0e17">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2300d2ff'/%3E%3Ctext x='32' y='43' font-size='28' font-family='Arial, sans-serif' font-weight='700' fill='%23051019' text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E">
+
+  <!-- Bootstrap 5 (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome (CDN) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* =========================================================
+       TOKENS (mismos que la landing, para mantener identidad visual)
+       ========================================================= */
+    :root{
+      --bg-0: #05070c; --bg-1: #0b0f18; --bg-2: #10151f;
+      --card: #131926; --card-border: rgba(255,255,255,.08);
+      --cyan: #00d2ff; --blue: #3a7bd5;
+      --gradient: linear-gradient(135deg, var(--cyan) 0%, var(--blue) 100%);
+      --text-hi: #eef2f8; --text-mid: #9aa5b8; --text-low: #5c6579;
+      --whatsapp: #25D366;
+      --radius-lg: 18px; --radius-md: 12px;
+      --shadow-glow: 0 0 0 1px rgba(0,210,255,.15), 0 20px 60px -20px rgba(0,210,255,.35);
+      --ease: cubic-bezier(.22,.61,.36,1);
+    }
+    *{ box-sizing: border-box; }
+    html{ scroll-behavior: smooth; scroll-padding-top: 84px; }
+    body{ background: var(--bg-1); color: var(--text-mid); font-family:'Inter',sans-serif; line-height:1.65; overflow-x:hidden; }
+    h1,h2,h3,h4{ font-family:'Space Grotesk',sans-serif; color: var(--text-hi); letter-spacing:-0.01em; line-height:1.15; }
+    a{ text-decoration:none; }
+    ::selection{ background: var(--cyan); color:#04121a; }
+    :focus-visible{ outline: 2px solid var(--cyan); outline-offset: 3px; border-radius: 4px; }
+    .container-xl{ max-width: 1220px; }
+    .text-gradient{ background: var(--gradient); -webkit-background-clip:text; background-clip:text; color:transparent; }
+
+    /* ---- botones (idénticos a la landing) ---- */
+    .btn-nexa-primary{
+      background: var(--gradient); color:#051019; font-weight:600;
+      padding:.75rem 1.6rem; border-radius:999px; border:none;
+      transition: transform .35s var(--ease), box-shadow .35s var(--ease);
+      box-shadow: 0 10px 30px -12px rgba(0,210,255,.55);
+    }
+    .btn-nexa-primary:hover, .btn-nexa-primary:focus-visible{ transform: translateY(-3px); box-shadow: 0 16px 40px -10px rgba(0,210,255,.75); color:#051019; }
+    .btn-nexa-primary:disabled{ opacity:.4; cursor:not-allowed; transform:none; box-shadow:none; }
+    .btn-nexa-outline{
+      background:transparent; color:var(--text-hi); font-weight:600;
+      padding:.75rem 1.6rem; border-radius:999px; border:1.5px solid rgba(255,255,255,.18);
+      transition: border-color .35s var(--ease), background .35s var(--ease), transform .35s var(--ease);
+    }
+    .btn-nexa-outline:hover, .btn-nexa-outline:focus-visible{ border-color: var(--cyan); background: rgba(0,210,255,.08); color:var(--text-hi); transform: translateY(-3px); }
+
+    /* ---- header simple ---- */
+    .manual-nav{
+      position: sticky; top:0; z-index:1030;
+      background: rgba(5,7,12,.9);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 1rem 0;
+    }
+    .brand-mark{ display:inline-flex; align-items:center; gap:.6rem; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.15rem; color:var(--text-hi); }
+    .brand-icon{ width:36px; height:36px; border-radius:10px; display:grid; place-items:center; background:var(--gradient); color:#051019; font-size:.95rem; flex-shrink:0; }
+    .back-link{ color: var(--text-mid); font-size:.88rem; transition: color .3s; }
+    .back-link:hover{ color: var(--cyan); }
+
+    /* ---- intro ---- */
+    .manual-hero{
+      padding: 4rem 0 3rem;
+      background: radial-gradient(ellipse 80% 60% at 20% 0%, rgba(58,123,213,.16), transparent 60%), linear-gradient(180deg, var(--bg-0) 0%, var(--bg-1) 70%);
+    }
+    .manual-eyebrow{
+      display:inline-flex; align-items:center; gap:.5rem;
+      background: rgba(0,210,255,.09); border:1px solid rgba(0,210,255,.25); color: var(--cyan);
+      padding:.4rem .9rem; border-radius:999px; font-size:.8rem; font-weight:500;
+    }
+    .manual-hero h1{ font-size: clamp(1.9rem, 3.6vw, 2.7rem); margin: 1.1rem 0 1rem; max-width: 780px; }
+    .manual-hero p.lead-copy{ font-size: 1.02rem; max-width: 640px; color: var(--text-mid); }
+    .demo-note{
+      display:inline-flex; align-items:center; gap:.5rem;
+      font-size:.8rem; color: var(--text-low);
+      border:1px dashed rgba(255,255,255,.15); border-radius: 10px; padding:.55rem .9rem; margin-top:1.3rem;
+    }
+    .demo-note i{ color: #facc15; }
+
+    /* ---- tabs (nav-pills a medida) ---- */
+    .modules-section{ padding-bottom: 6rem; }
+    #sistemaTab{ gap:.4rem; }
+    #sistemaTab .nav-link{
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      color: var(--text-mid);
+      border-radius: 12px;
+      padding: .85rem 1rem;
+      display:flex; align-items:center; gap:.85rem;
+      text-align:left;
+      transition: all .3s var(--ease);
+      width: 100%;
+    }
+    #sistemaTab .nav-link i{ width:20px; text-align:center; color: var(--text-low); font-size:1rem; flex-shrink:0; }
+    #sistemaTab .nav-link .module-name{ display:block; font-weight:600; font-size:.9rem; color:inherit; }
+    #sistemaTab .nav-link .module-tag{ display:block; font-size:.68rem; color: var(--text-low); margin-top:.1rem; }
+    #sistemaTab .nav-link:hover{ border-color: rgba(0,210,255,.3); color: var(--text-hi); }
+    #sistemaTab .nav-link.active{ background: rgba(0,210,255,.08); border-color: rgba(0,210,255,.35); color: var(--text-hi); }
+    #sistemaTab .nav-link.active i{ color: var(--cyan); }
+
+    @media (max-width: 991px){
+      #sistemaTab{ flex-direction: row !important; flex-wrap: nowrap; overflow-x: auto; padding-bottom: .6rem; margin-bottom: 1.5rem; }
+      #sistemaTab .nav-link{ flex-direction: column; text-align:center; white-space: nowrap; min-width: 130px; }
+      #sistemaTab .nav-link .module-name{ margin-top:.3rem; }
+    }
+
+    /* ---- tarjeta de descripción del módulo ---- */
+    .module-info{ background: var(--card); border:1px solid var(--card-border); border-radius: var(--radius-lg); padding: 1.8rem; height:100%; }
+    .usage-tag{ display:inline-flex; align-items:center; gap:.4rem; font-size:.72rem; font-weight:600; padding:.32rem .8rem; border-radius:999px; margin-bottom:1.1rem; }
+    .usage-tag.internal{ color: var(--cyan); background: rgba(0,210,255,.09); border:1px solid rgba(0,210,255,.25); }
+    .usage-tag.branch{ color:#facc15; background: rgba(250,204,21,.1); border:1px solid rgba(250,204,21,.3); }
+    .usage-tag.client{ color:#4ade80; background: rgba(74,222,128,.1); border:1px solid rgba(74,222,128,.3); }
+    .module-info h3{ font-size: 1.12rem; margin-bottom:.9rem; }
+    .module-info ul{ list-style:none; padding:0; margin:0; }
+    .module-info li{ display:flex; gap:.6rem; align-items:flex-start; padding:.55rem 0; border-bottom:1px solid var(--card-border); font-size:.87rem; color: var(--text-mid); }
+    .module-info li:last-child{ border-bottom:none; }
+    .module-info li i{ color: var(--cyan); margin-top:.2rem; flex-shrink:0; }
+
+    /* ---- marco de pantalla (mockup del software) ---- */
+    .screen-frame{ background: var(--card); border:1px solid var(--card-border); border-radius: var(--radius-lg); padding:.6rem; box-shadow: var(--shadow-glow); height:100%; }
+    .frame-bar{ display:flex; align-items:center; gap:.4rem; padding:.55rem .7rem; }
+    .frame-bar span{ width:9px; height:9px; border-radius:50%; background: rgba(255,255,255,.15); }
+    .frame-bar .frame-title{ margin-left:.6rem; font-size:.72rem; color: var(--text-low); font-family:'Space Grotesk',sans-serif; }
+    .screen-body{ background:#0c111b; border:1px solid var(--card-border); border-radius:10px; padding:1.1rem; min-height: 380px; display:flex; flex-direction:column; gap:.7rem; }
+
+    /* ---- panel general: sidebar + kpis + chart + tabla ---- */
+    .dash-flex{ display:flex; gap:.9rem; flex:1; }
+    .dash-sidebar{ width:40px; flex-shrink:0; display:flex; flex-direction:column; align-items:center; gap:.9rem; padding-top:.2rem; }
+    .dash-sidebar i{ color: var(--text-low); font-size:.95rem; }
+    .dash-sidebar i.active{ color: var(--cyan); background: rgba(0,210,255,.14); padding:.5rem; border-radius:8px; margin:-.5rem; }
+    .dash-main{ flex:1; min-width:0; display:flex; flex-direction:column; gap:.7rem; }
+    .dash-stats-row{ display:grid; grid-template-columns: repeat(2,1fr); gap:.55rem; }
+    @media (min-width: 576px){ .dash-stats-row{ grid-template-columns: repeat(4,1fr); } }
+    .dash-stat{ background: rgba(255,255,255,.03); border:1px solid var(--card-border); border-radius:8px; padding:.55rem .7rem; }
+    .dash-stat .label{ font-size:.62rem; color: var(--text-low); }
+    .dash-stat .value{ font-family:'Space Grotesk',sans-serif; font-weight:700; color: var(--text-hi); font-size:.95rem; }
+    .dash-stat .delta{ font-size:.62rem; font-weight:600; }
+    .dash-stat .delta.up{ color:#4ade80; } .dash-stat .delta.down{ color:#f87171; }
+    .dash-card{ background: rgba(255,255,255,.03); border:1px solid var(--card-border); border-radius:8px; padding:.65rem .75rem .5rem; }
+    .dash-card .card-title{ font-size:.7rem; color: var(--text-mid); margin-bottom:.55rem; }
+    .chart-bars{ display:flex; align-items:flex-end; gap:6px; height:70px; }
+    .chart-bars span{ flex:1; border-radius:3px 3px 0 0; background: linear-gradient(180deg, var(--cyan), var(--blue)); }
+    .dash-row{ display:flex; justify-content:space-between; align-items:center; gap:.5rem; padding:.4rem 0; border-bottom:1px solid rgba(255,255,255,.05); font-size:.72rem; }
+    .dash-row:last-child{ border-bottom:none; }
+    .dash-row .client{ color: var(--text-hi); font-weight:500; flex:1.3; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .dash-row .amount{ color: var(--text-mid); flex:1; text-align:right; }
+    .status-badge{ font-size:.62rem; padding:.15rem .55rem; border-radius:999px; font-weight:600; flex-shrink:0; }
+    .status-badge.approved{ background: rgba(74,222,128,.15); color:#4ade80; }
+    .status-badge.review{ background: rgba(250,204,21,.15); color:#facc15; }
+    .status-badge.rejected{ background: rgba(248,113,113,.15); color:#f87171; }
+    .status-badge.current{ background: rgba(74,222,128,.15); color:#4ade80; }
+    .status-badge.late{ background: rgba(248,113,113,.15); color:#f87171; }
+
+    /* ---- solicitudes de crédito ---- */
+    .table-toolbar{ display:flex; flex-wrap:wrap; gap:.7rem; align-items:center; justify-content:space-between; }
+    .fake-input{ flex:1; min-width:180px; display:flex; align-items:center; gap:.5rem; background: rgba(255,255,255,.03); border:1px solid var(--card-border); border-radius:8px; padding:.5rem .8rem; font-size:.76rem; color: var(--text-low); }
+    .filter-pills{ display:flex; gap:.4rem; flex-wrap:wrap; }
+    .filter-pill{ font-size:.7rem; padding:.35rem .8rem; border-radius:999px; border:1px solid var(--card-border); color: var(--text-mid); }
+    .filter-pill.active{ background: var(--gradient); color:#051019; border-color:transparent; font-weight:600; }
+    .app-table{ border:1px solid var(--card-border); border-radius:8px; overflow:hidden; }
+    .app-row{ display:grid; grid-template-columns: 1.6fr .9fr .6fr .9fr .7fr; gap:.5rem; padding:.6rem .75rem; font-size:.72rem; align-items:center; border-bottom:1px solid rgba(255,255,255,.05); }
+    .app-row:last-child{ border-bottom:none; }
+    .app-row-head{ background: rgba(255,255,255,.03); color: var(--text-low); font-size:.64rem; font-weight:600; }
+    .app-row .row-actions i{ color: var(--text-low); margin-right:.55rem; font-size:.82rem; }
+    .app-row .row-actions i.ok{ color:#4ade80; } .app-row .row-actions i.no{ color:#f87171; }
+
+    /* ---- scoring de riesgo ---- */
+    .risk-profile{ display:flex; align-items:center; gap:.8rem; }
+    .risk-avatar{ width:42px; height:42px; border-radius:50%; background: var(--gradient); display:grid; place-items:center; color:#051019; font-weight:700; font-family:'Space Grotesk',sans-serif; font-size:.82rem; flex-shrink:0; }
+    .risk-profile .name{ color: var(--text-hi); font-weight:600; font-size:.85rem; }
+    .risk-profile .meta{ font-size:.72rem; color: var(--text-low); }
+    .score-meter{ background: rgba(255,255,255,.03); border:1px solid var(--card-border); border-radius:8px; padding:.9rem; }
+    .score-top{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:.55rem; }
+    .score-value{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.35rem; color: var(--text-hi); }
+    .score-tag{ font-size:.7rem; color:#4ade80; background: rgba(74,222,128,.12); padding:.2rem .6rem; border-radius:999px; }
+    .score-bar{ height:8px; border-radius:999px; background: rgba(255,255,255,.06); overflow:hidden; }
+    .score-fill{ height:100%; background: var(--gradient); border-radius:999px; }
+    .risk-factors{ list-style:none; padding:0; margin:0; background: rgba(255,255,255,.03); border:1px solid var(--card-border); border-radius:8px; }
+    .risk-factors li{ display:flex; gap:.6rem; align-items:center; padding:.55rem .8rem; font-size:.76rem; color: var(--text-mid); border-bottom:1px solid rgba(255,255,255,.05); }
+    .risk-factors li:last-child{ border-bottom:none; }
+    .risk-factors i.ok{ color:#4ade80; } .risk-factors i.warn{ color:#facc15; }
+    .risk-recommendation{ background: rgba(0,210,255,.08); border:1px solid rgba(0,210,255,.25); border-radius:8px; padding:.7rem .9rem; font-size:.78rem; color: var(--text-hi); }
+
+    /* ---- verificación presencial ---- */
+    .branch-header{ display:flex; flex-wrap:wrap; justify-content:space-between; gap:.5rem; padding-bottom:.8rem; border-bottom:1px solid var(--card-border); font-size:.8rem; }
+    .branch-header strong{ color: var(--text-hi); }
+    .checklist-verify{ list-style:none; padding:0; margin:0; }
+    .checklist-verify li{ display:flex; gap:.7rem; align-items:flex-start; padding:.55rem 0; font-size:.82rem; color: var(--text-mid); border-bottom:1px solid rgba(255,255,255,.05); }
+    .checklist-verify li:last-child{ border-bottom:none; }
+    .checklist-verify li.done i{ color:#4ade80; } .checklist-verify li.pending i{ color: var(--text-low); }
+    .checklist-verify li.done span{ color: var(--text-hi); }
+    .signature-box{ border:1.5px dashed rgba(255,255,255,.18); border-radius:8px; padding:1.1rem; text-align:center; }
+    .signature-box svg{ opacity:.55; margin-bottom:.3rem; }
+    .signature-box span{ display:block; font-size:.74rem; color: var(--text-low); }
+    .disburse-note{ font-size:.7rem; color: var(--text-low); text-align:center; margin-top:.6rem; }
+
+    /* ---- cartera y cobranzas ---- */
+    .activity-feed{ list-style:none; padding:0; margin:0; }
+    .activity-feed li{ display:flex; gap:.6rem; padding:.5rem 0; border-bottom:1px solid rgba(255,255,255,.05); font-size:.74rem; color: var(--text-mid); }
+    .activity-feed li:last-child{ border-bottom:none; }
+    .activity-feed li i{ color: var(--cyan); margin-top:.15rem; flex-shrink:0; }
+    .activity-feed .time{ display:block; font-size:.64rem; color: var(--text-low); margin-top:.1rem; }
+
+    /* ---- portal del cliente ---- */
+    .stepper-track{ display:flex; align-items:center; gap:.4rem; margin-bottom:.6rem; }
+    .stepper-track .step{ width:26px; height:26px; border-radius:50%; display:grid; place-items:center; font-size:.7rem; font-weight:700; font-family:'Space Grotesk',sans-serif; background: rgba(255,255,255,.06); color: var(--text-low); flex-shrink:0; }
+    .stepper-track .step.done{ background: var(--gradient); color:#051019; }
+    .stepper-track .step.active{ background:transparent; border:2px solid var(--cyan); color: var(--cyan); }
+    .stepper-track .line{ flex:1; height:2px; background: rgba(255,255,255,.08); }
+    .stepper-track .line.done{ background: var(--gradient); }
+    .stepper-labels{ display:flex; justify-content:space-between; font-size:.64rem; color: var(--text-low); margin-bottom: 1rem; }
+    .upload-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(130px,1fr)); gap:.6rem; }
+    .upload-box{ border:1.5px dashed rgba(255,255,255,.18); border-radius:8px; padding:1rem .6rem; text-align:center; font-size:.72rem; color: var(--text-mid); }
+    .upload-box i{ display:block; font-size:1.25rem; color: var(--cyan); margin-bottom:.5rem; }
+    .client-note{ background: rgba(0,210,255,.08); border:1px solid rgba(0,210,255,.25); border-radius:8px; padding:.8rem .9rem; font-size:.78rem; color: var(--text-hi); display:flex; gap:.6rem; align-items:flex-start; }
+    .client-note i{ color: var(--cyan); margin-top:.15rem; flex-shrink:0; }
+
+    /* ---- cta de cierre ---- */
+    .manual-cta{
+      display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:1.6rem;
+      background: linear-gradient(135deg, #0f2436, #0a121c 70%);
+      border:1px solid var(--card-border); border-radius: var(--radius-lg);
+      padding: 2.4rem 2.2rem;
+    }
+    .manual-cta h3{ font-size:1.25rem; margin-bottom:.4rem; }
+    .manual-cta p{ margin:0; color: var(--text-mid); font-size:.92rem; max-width: 480px; }
+
+    footer{ background: var(--bg-0); border-top:1px solid var(--card-border); padding: 2.4rem 0; }
+    footer p{ margin:0; font-size:.82rem; color: var(--text-low); }
+    footer a{ color: var(--text-mid); }
+    footer a:hover{ color: var(--cyan); }
+
+    /* ---- whatsapp flotante (igual que la landing) ---- */
+    .whatsapp-float{
+      position: fixed; right:1.6rem; bottom:1.6rem; z-index:1040;
+      width:58px; height:58px; border-radius:50%; background: var(--whatsapp); color:#fff;
+      display:grid; place-items:center; font-size:1.6rem;
+      box-shadow: 0 12px 30px -8px rgba(37,211,102,.6);
+      transition: transform .3s var(--ease);
+    }
+    .whatsapp-float::before{ content:""; position:absolute; inset:0; border-radius:50%; border:2px solid var(--whatsapp); animation: pulseRing 2.2s infinite; }
+    @keyframes pulseRing{ 0%{ transform:scale(1); opacity:.7; } 100%{ transform:scale(1.6); opacity:0; } }
+    .whatsapp-float:hover{ transform: scale(1.08); color:#fff; }
+    .whatsapp-tooltip{
+      position:absolute; right:72px; top:50%; transform: translateY(-50%) translateX(8px);
+      background: var(--card); border:1px solid var(--card-border); color: var(--text-hi);
+      padding:.5rem .9rem; border-radius:8px; font-size:.82rem; white-space:nowrap;
+      opacity:0; visibility:hidden; transition: opacity .3s var(--ease), transform .3s var(--ease);
+    }
+    .whatsapp-float:hover .whatsapp-tooltip, .whatsapp-float:focus-visible .whatsapp-tooltip{ opacity:1; visibility:visible; transform: translateY(-50%) translateX(0); }
+
+    @media (prefers-reduced-motion: reduce){
+      *{ transition:none !important; animation:none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =========================================================
+       NAV SIMPLE (esta es una página "interna" del sitio)
+       ========================================================= -->
+  <nav class="manual-nav">
+    <div class="container container-xl d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <a class="brand-mark" href="nexacred-landing.html">
+        <span class="brand-icon"><i class="fa-solid fa-diagram-project" aria-hidden="true"></i></span>
+        Nexa<span class="text-gradient">Cred</span>
+      </a>
+      <div class="d-flex align-items-center gap-3">
+        <a href="nexacred-landing.html" class="back-link"><i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i> Volver al sitio</a>
+        <a href="nexacred-landing.html#contacto" class="btn-nexa-primary d-none d-sm-inline-block">Solicitar demo</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- =========================================================
+       INTRO
+       ========================================================= -->
+  <header class="manual-hero">
+    <div class="container container-xl">
+      <span class="manual-eyebrow"><i class="fa-solid fa-compass" aria-hidden="true"></i> Manual del sistema</span>
+      <h1>Conocé el sistema NexaCred por dentro</h1>
+      <p class="lead-copy">
+        Un recorrido guiado por los módulos que va a usar tu equipo y por el portal donde tus clientes cargan su solicitud. Elegí una pestaña para ver la pantalla y qué se puede hacer en ella.
+      </p>
+      <div class="demo-note">
+        <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+        Esta es una demostración: los nombres, montos y datos que ves son de ejemplo.
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================
+       MÓDULOS DEL SISTEMA (TABS)
+       ========================================================= -->
+  <section class="modules-section">
+    <div class="container container-xl">
+      <div class="row g-4">
+
+        <!-- Navegación de módulos -->
+        <div class="col-lg-3">
+          <div class="nav flex-lg-column nav-pills" id="sistemaTab" role="tablist" aria-orientation="vertical">
+            <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#panel-general" type="button" role="tab">
+              <i class="fa-solid fa-gauge-high" aria-hidden="true"></i>
+              <span><span class="module-name">Panel general</span><span class="module-tag">Equipo interno</span></span>
+            </button>
+            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#solicitudes" type="button" role="tab">
+              <i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i>
+              <span><span class="module-name">Solicitudes de crédito</span><span class="module-tag">Equipo interno</span></span>
+            </button>
+            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#scoring" type="button" role="tab">
+              <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+              <span><span class="module-name">Scoring de riesgo</span><span class="module-tag">Analista de riesgo</span></span>
+            </button>
+            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#verificacion" type="button" role="tab">
+              <i class="fa-solid fa-fingerprint" aria-hidden="true"></i>
+              <span><span class="module-name">Verificación y firma</span><span class="module-tag">Personal de sucursal</span></span>
+            </button>
+            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#cartera" type="button" role="tab">
+              <i class="fa-solid fa-wallet" aria-hidden="true"></i>
+              <span><span class="module-name">Cartera y cobranzas</span><span class="module-tag">Equipo interno</span></span>
+            </button>
+            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#portal-cliente" type="button" role="tab">
+              <i class="fa-solid fa-user" aria-hidden="true"></i>
+              <span><span class="module-name">Portal del cliente</span><span class="module-tag">Cliente final</span></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Contenido de cada módulo -->
+        <div class="col-lg-9">
+          <div class="tab-content" id="sistemaTabContent">
+
+            <!-- ============ PANEL GENERAL ============ -->
+            <div class="tab-pane fade show active" id="panel-general" role="tabpanel">
+              <div class="row g-4">
+                <div class="col-lg-7">
+                  <div class="screen-frame">
+                    <div class="frame-bar"><span></span><span></span><span></span><span class="frame-title">panel.nexacred.com</span></div>
+                    <div class="screen-body">
+                      <div class="dash-flex">
+                        <aside class="dash-sidebar" aria-hidden="true">
+                          <i class="fa-solid fa-gauge-high active"></i>
+                          <i class="fa-solid fa-users"></i>
+                          <i class="fa-solid fa-file-invoice-dollar"></i>
+                          <i class="fa-solid fa-chart-line"></i>
+                          <i class="fa-solid fa-gear"></i>
+                        </aside>
+                        <div class="dash-main">
+                          <div class="dash-stats-row">
+                            <div class="dash-stat"><div class="label">Cartera activa</div><div class="value">$128.4M</div><div class="delta up">▲ 4.2%</div></div>
+                            <div class="dash-stat"><div class="label">Tasa de aprobación</div><div class="value">78%</div><div class="delta up">▲ 6.1%</div></div>
+                            <div class="dash-stat"><div class="label">Score promedio</div><div class="value">712</div><div class="delta up">▲ 1.4%</div></div>
+                            <div class="dash-stat"><div class="label">Mora 30+ días</div><div class="value">3.2%</div><div class="delta down">▼ 0.8%</div></div>
+                          </div>
+                          <div class="dash-card">
+                            <div class="card-title">Desembolsos mensuales</div>
+                            <div class="chart-bars">
+                              <span style="height:38%"></span><span style="height:52%"></span><span style="height:46%"></span><span style="height:64%"></span>
+                              <span style="height:58%"></span><span style="height:75%"></span><span style="height:70%"></span><span style="height:92%"></span>
+                            </div>
+                          </div>
+                          <div class="dash-card">
+                            <div class="card-title">Solicitudes recientes</div>
+                            <div class="dash-row"><span class="client">M. Fernández</span><span class="amount">$450.000</span><span class="status-badge approved">Aprobado</span></div>
+                            <div class="dash-row"><span class="client">Comercial Rioja S.A.</span><span class="amount">$1.200.000</span><span class="status-badge review">En revisión</span></div>
+                            <div class="dash-row"><span class="client">L. Gómez</span><span class="amount">$280.000</span><span class="status-badge rejected">Rechazado</span></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-5">
+                  <div class="module-info">
+                    <span class="usage-tag internal"><i class="fa-solid fa-user-tie" aria-hidden="true"></i> Uso: equipo interno</span>
+                    <h3>Qué podés hacer en esta pantalla</h3>
+                    <ul>
+                      <li><i class="fa-solid fa-check" aria-hidden="true"></i> Ver el estado general de la cartera en tiempo real, sin planillas.</li>
+                      <li><i class="fa-solid fa-check" aria-hidden="true"></i> Monitorear la tasa de aprobación y el score promedio de tus clientes.</li>
+                      <li><i class="fa-solid fa-check" aria-hidden="true"></i> Detectar variaciones en la mora antes de que se conviertan en un problema.</li>
+                      <li><i class="fa-solid fa-check" aria-hidden="true"></i> Acceder rápido a las solicitudes que están pendientes de revisión.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ============ SOLICITUDES DE CRÉDITO ============ -->
+            <div class="tab-pane fade" id="solicitudes" role="tabpanel">
+              <div class="row g-4">
+                <div class="col-lg-7">
+                  <div class="screen-frame">
+                    <div class="frame-bar"><span></span><span></span><span></span><span class="frame-title">panel.nexacred.com/solicitudes</span></div>
+                    <div class="screen-body">
+                      <div class="table-toolbar">
+                        <div class="fake-input"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> Buscar por cliente o N° de solicitud</div>
+                        <div class="filter-pills">
+                          <span class="filter-pill active">Todas</span>
+                          <span class="filter-pill">Pendientes</span>
+                          <span class="filter-pill">Aprobadas</span>
+                          <span class="filter-pill">Rechazadas</span>
+                        </div>
+                      </div>
+                      <div class="app-table mt-3">
+                        <div class="app-row app-row-head"><span>Cliente</span><span>Monto</span><span>Score</span><span>Estado</span><span>Acción</span></div>
+                        <div class="app-row"><span>Mariana Fernández</span><span>$450.000</span><span>712</span><span class="status-badge approved">Aprobado</span><span class="row-actions"><i class="fa-solid fa-eye" aria-hidden="true"></i></span></div>
+                        <div class="app-row"><span>Comercial Rioja S.A.</span><span>$1.200.000</span><span>640</span><span class="status-badge review">En revisión</span><span class="row-actions"><i class="fa-solid fa-eye" aria-hidden="true"></i><i class="fa-solid fa-check ok" aria-hidden="true"></i><i class="fa-solid fa-xmark no" aria-hidden="true"></i></span></div>
+                        <div class="app-row"><span>Lucas Gómez</span><span>$280.000</span><span>588</span><span class="status-badge rejected">Rechazado</span><span class="row-actions"><i class="fa-solid fa-eye" aria-hidden="true"></i></span></div>
+                        <div class="app-row"><span>Norma Aguirre</span><span>$860.000</span><span>701</span><span class="status-badge approved">Aprobado</span><span class="row-actions"><i class="fa-solid fa-eye" aria-hidden="true"></i></span></div>
+                        <div class="app-row"><span>Distribuidora Sur SRL</span><span>$2.100.000</span><span>655</span><span class="status-badge review">En revisión</span><span class="row-actions"><i class="fa-solid fa-eye" aria-hidden="true"></i><i class="fa-solid fa-check ok" aria-hidden="true"></i><i class="fa-solid fa-xmark no" aria-hidden="true"></i></span></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-5">
+                  <div class="module-info">
+                    <span class="usage-tag internal"><i class="fa-solid fa-user-tie" aria-hidden="true"></i> Uso: equipo interno</span>
+                    <h3>Qué podés hacer en esta pantalla</h3>
+                    <ul>
+                      <li><i class="fa-solid fa-check" aria-hidden="true"></i> Buscar y filtrar solicitudes por estado, sucursal o rango de monto.</li>
+                      <li><i class="fa-solid fa-check" aria-hidden="true"></i> Ver el detalle completo de cada solicitud: datos del cliente, documentación cargada y score.</li>
+                      <li><i class="fa-solid fa-check" aria-hidden="true"></i> Aprobar, rechazar o pedir información adicional con un clic.</li>
+                      <li><i class="fa-solid fa-check" aria-hidden="true"></i> Dejar comentarios internos para el equipo de riesgo o de sucursal.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ============ SCORING DE RIESGO ============ -->
+            <div class="tab-pane fade" id="scoring" role="tabpanel">
+              <div class="row g-4">
+                <div class="col-lg-7">
+                  <div class="screen-frame">
+                    <div class="frame-bar"><span></span><span></span><span></span><span class="frame-title">panel.nexacred.com/scoring</span></div>
+                    <div class="screen-body">
+                      <div class="risk-profile">
+                        <div class="risk-avatar">MF</div>
+                        <div><div class="name">Mariana Fernández</div><div class="meta">DNI 30.xxx.xxx · Cliente desde 2022</div></div>
+                      </div>
+                      <div class="score-meter">
+                        <div class="score-top"><span class="score-value">712</span><span class="score-tag">Riesgo bajo</span></div>
+                        <div class="score-bar"><div class="score-fill" style="width:71%"></div></div>
+                      </div>
+                      <ul class="risk-factors">
+                        <li><i class="fa-solid fa-circle-check ok" aria-hidden="true"></i> Historial de pago: bueno</li>
+                        <li><i class="fa-solid fa-circle-check ok" aria-hidden="true"></i> Buró de crédito: sin deudas activas</li>
+                        <li><i class="fa-solid fa-circle-check ok" aria-hidden="true"></i> Relación cuota-ingreso: 28%</li>
+                        <li><i class="fa-solid fa-triangle-exclamation warn" aria-hidden="true"></i> Antigüedad laboral: 2 años</li>
+                      </ul>
+                      <div class="risk-recommendation"><i class="fa-solid fa-lightbulb me-1" aria-hidden="true"></i> Recomendación del sistema: aprobar con tasa estándar.</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-5">
+                  <div class="module-info">
+                    <span class="usage-tag internal"><i class="fa-solid fa-user-tie" aria-hidden="true"></i> Uso: analista de riesgo</span>
+                    <h3>Qué podés hacer en esta pantalla</h3>
+                    <ul>
+                      <li><i class="fa-solid fa-check" aria-hidden="true"></i> Analizar automáticamente el perfil de riesgo de cada solicitante.</li>
+                      <li><i class="fa-solid fa-check" aria-hidden="true"></i> Ver el detalle de cada factor que compone el score.</li>
+                      <li><i class="fa-solid fa-check" aria-hidden="true"></i> Ajustar manualmente las reglas de la política de riesgo por producto o segmento.</li>
+                      <li><i class="fa-solid fa-check" aria-hidden="true"></i> Dejar una recomendación clara para el equipo de aprobación.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ============ VERIFICACIÓN PRESENCIAL Y FIRMA ============ -->
+            <div class="tab-pane fade" id="verificacion" role="tabpanel">
+              <div class="row g-4">
+                <div class="col-lg-7">
+                  <div class="screen-frame">
+                    <div class="frame-bar"><span></span><span></span><span></span><span class="frame-title">sucursal.nexacred.com/verificacion</span></div>
+                    <div class="screen-body">
+                      <div class="branch-header">
+                        <div><strong>Sucursal Centro</strong> · Turno 10:30 hs</div>
+                        <div>Cliente: Mariana Fernández</div>
+                      </div>
+                      <ul class="checklist-verify">
+                        <li class="done"><i class="fa-solid fa-square-check" aria-hidden="true"></i> <span>Documentación respaldatoria validada (DNI, recibo de sueldo, comprobante de domicilio)</span></li>
+                        <li class="done"><i class="fa-solid fa-square-check" aria-hidden="true"></i> <span>Datos biométricos capturados (huella digital y foto)</span></li>
+                        <li class="pending"><i class="fa-regular fa-square" aria-hidden="true"></i> <span>Firma del contrato</span></li>
+                      </ul>
+                      <div class="signature-box">
+                        <svg width="160" height="40" viewBox="0 0 160 40" aria-hidden="true">
+                          <path d="M5 30 Q 20 5, 35 25 T 65 20 Q 80 5, 95 28 T 130 15 Q 145 30, 155 10" stroke="#00d2ff" stroke-width="2" fill="none" stroke-linecap="round"/>
+                        </svg>
+                        <span>Firma pendiente</span>
+                      </div>
+                      <button class="btn-nexa-primary w-100" disabled>Confirmar y desembolsar</button>
+                      <p class="disburse-note">El desembolso se habilita automáticamente al confirmar la firma.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-5">
+                  <div class="module-info">
+                    <span class="usage-tag branch"><i class="fa-solid fa-building" aria-hidden="true"></i> Uso: personal de sucursal</span>
+                    <h3>Qué podés hacer en esta pantalla</h3>
+                    <ul>
+                      <li><i class="fa-solid fa-check" aria-hidden="true"></i> Registrar la verificación presencial en la sucursal una vez aprobado el crédito.</li>
+                      <li><i class="fa-solid fa-check" aria-hidden="true"></i> Cotejar la documentación respaldatoria original contra lo cargado online.</li>
+                      <li><i class="fa-solid fa-check" aria-hidden="true"></i> Capturar los datos biométricos del cliente (huella y/o foto) para prevenir fraude.</li>
+                      <li><i class="fa-solid fa-check" aria-hidden="true"></i> Confirmar la firma del contrato y liberar el desembolso desde el mismo sistema.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ============ CARTERA Y COBRANZAS ============ -->
+            <div class="tab-pane fade" id="cartera" role="tabpanel">
+              <div class="row g-4">
+                <div class="col-lg-7">
+                  <div class="screen-frame">
+                    <div class="frame-bar"><span></span><span></span><span></span><span class="frame-title">panel.nexacred.com/cartera</span></div>
+                    <div class="screen-body">
+                      <div class="dash-card">
+                        <div class="card-title">Créditos activos</div>
+                        <div class="dash-row"><span class="client">Mariana Fernández</span><span class="amount">Saldo $312.000</span><span class="status-badge current">Al día</span></div>
+                        <div class="dash-row"><span class="client">Norma Aguirre</span><span class="amount">Saldo $540.000</span><span class="status-badge current">Al día</span></div>
+                        <div class="dash-row"><span class="client">J. Pérez</span><span class="amount">Saldo $198.000</span><span class="status-badge late">Atrasado</span></div>
+                      </div>
+                      <div class="dash-card">
+                        <div class="card-title">Acciones automáticas</div>
+                        <ul class="activity-feed">
+                          <li><i class="fa-solid fa-bell" aria-hidden="true"></i><span>Recordatorio de pago enviado a J. Pérez<span class="time">Hace 2 días</span></span></li>
+                          <li><i class="fa-solid fa-file-signature" aria-hidden="true"></i><span>Plan de pago propuesto a M. López<span class="time">Hace 1 día</span></span></li>
+                          <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span>Cuota confirmada para Norma Aguirre<span class="time">Hoy</span></span></li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-5">
+                  <div class="module-info">
+                    <span class="usage-tag internal"><i class="fa-solid fa-user-tie" aria-hidden="true"></i> Uso: equipo interno</span>
+                    <h3>Qué podés hacer en esta pantalla</h3>
+                    <ul>
+                      <li><i class="fa-solid fa-check" aria-hidden="true"></i> Ver el estado de cada crédito activo: saldo, cuotas pagas y próximas.</li>
+                      <li><i class="fa-solid fa-check" aria-hidden="true"></i> Detectar atrasos apenas ocurren y disparar recordatorios automáticos.</li>
+                      <li><i class="fa-solid fa-check" aria-hidden="true"></i> Ofrecer planes de pago o refinanciación desde el mismo sistema.</li>
+                      <li><i class="fa-solid fa-check" aria-hidden="true"></i> Exportar reportes de cartera y mora para tu equipo directivo.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ============ PORTAL DEL CLIENTE ============ -->
+            <div class="tab-pane fade" id="portal-cliente" role="tabpanel">
+              <div class="row g-4">
+                <div class="col-lg-7">
+                  <div class="screen-frame">
+                    <div class="frame-bar"><span></span><span></span><span></span><span class="frame-title">solicitar.nexacred.com</span></div>
+                    <div class="screen-body">
+                      <div class="client-stepper">
+                        <div class="stepper-track">
+                          <span class="step done">1</span><span class="line done"></span>
+                          <span class="step done">2</span><span class="line done"></span>
+                          <span class="step active">3</span>
+                        </div>
+                        <div class="stepper-labels"><span>Préstamo</span><span>Datos personales</span><span>Documentación</span></div>
+                      </div>
+                      <div class="upload-grid">
+                        <div class="upload-box"><i class="fa-solid fa-id-card" aria-hidden="true"></i> DNI (frente y dorso)</div>
+                        <div class="upload-box"><i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i> Recibo de sueldo</div>
+                        <div class="upload-box"><i class="fa-solid fa-house" aria-hidden="true"></i> Comprobante de domicilio</div>
+                      </div>
+                      <div class="client-note mt-3">
+                        <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                        <span>Si tu préstamo se aprueba, vas a tener que acercarte a la sucursal más cercana con la documentación original para validar tus datos y firmar el contrato.</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-5">
+                  <div class="module-info">
+                    <span class="usage-tag client"><i class="fa-solid fa-user" aria-hidden="true"></i> Uso: cliente final</span>
+                    <h3>Qué podés hacer en esta pantalla</h3>
+                    <ul>
+                      <li><i class="fa-solid fa-check" aria-hidden="true"></i> Completar la solicitud desde cualquier dispositivo, sin planillas en papel.</li>
+                      <li><i class="fa-solid fa-check" aria-hidden="true"></i> Subir la documentación requerida directamente en el formulario.</li>
+                      <li><i class="fa-solid fa-check" aria-hidden="true"></i> Ver el estado de la solicitud en tiempo real (en revisión, aprobada, rechazada).</li>
+                      <li><i class="fa-solid fa-check" aria-hidden="true"></i> Si se aprueba, el sistema le indica el siguiente paso: acercarse a la sucursal para la verificación final.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA de cierre -->
+      <div class="manual-cta mt-5">
+        <div>
+          <h3>¿Querés ver esto funcionando con tus propios datos?</h3>
+          <p>Coordiná una demo en vivo y te mostramos el sistema completo, adaptado a la operación de tu financiera.</p>
+        </div>
+        <a href="nexacred-landing.html#contacto" class="btn-nexa-primary flex-shrink-0">Solicitar una demo</a>
+        <a href="nexacred-app.html" target="_blank" rel="noopener" class="btn-nexa-outline flex-shrink-0">Probar el sistema funcionando</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container container-xl d-flex flex-wrap justify-content-between gap-2">
+      <p>&copy; 2026 NexaCred S.R.L. — Manual del sistema (demostración).</p>
+      <p><a href="nexacred-landing.html">Volver al sitio principal</a></p>
+    </div>
+  </footer>
+
+  <!-- Botón flotante de WhatsApp -->
+  <a href="https://wa.me/5491100000000" class="whatsapp-float" target="_blank" rel="noopener" aria-label="Comunicate con nosotros por WhatsApp">
+    <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>
+    <span class="whatsapp-tooltip">Comunicate con nosotros</span>
+  </a>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
