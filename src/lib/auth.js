@@ -1,25 +1,38 @@
-/* Acceso de demostración (credenciales fijas). En el sistema real: JWT en cookie httpOnly (RF-17). */
+/* Sesión del panel. Las credenciales salen del módulo de empleados del store.
+   En el sistema real: JWT en cookie httpOnly + contraseñas con hash (RF-17). */
+import { getState, registrarActor, useStore } from './store';
+
 const K = 'nexacred-admin-session';
-export const DEMO_USER = 'admin@nexacred.com';
-export const DEMO_PASS = 'demo1234';
-export const isAuth = () => {
+const leer = () => {
   try {
-    return sessionStorage.getItem(K) === '1';
+    return Number(sessionStorage.getItem(K)) || null;
   } catch {
-    return false;
+    return null;
   }
 };
-export const login = (u, p) => {
-  const ok = u.trim().toLowerCase() === DEMO_USER && p === DEMO_PASS;
-  if (ok) {
-    try {
-      sessionStorage.setItem(K, '1');
-    } catch { /* ignorar */ }
-  }
-  return ok;
+export const usuarioActual = () => {
+  const id = leer();
+  return getState().empleados.find((e) => e.id === id && e.activo) || null;
+};
+registrarActor(() => usuarioActual()?.nombre || '');
+
+export const isAuth = () => !!usuarioActual();
+export const login = (email, pass) => {
+  const e = getState().empleados.find((x) => x.activo && x.email === email.trim().toLowerCase() && x.password === pass);
+  if (!e) return false;
+  try {
+    sessionStorage.setItem(K, String(e.id));
+  } catch { /* ignorar */ }
+  return true;
 };
 export const logout = () => {
   try {
     sessionStorage.removeItem(K);
   } catch { /* ignorar */ }
+};
+export const can = (u, perm) => !!u && (u.admin || (perm === 'admin' ? false : u.permisos.includes(perm)));
+/** Usuario con sesión; se vuelve a renderizar si cambian sus datos. */
+export const useUsuario = () => {
+  useStore();
+  return usuarioActual();
 };

@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
 import { Search, Plus, Eye, Check, X, Fingerprint, Inbox, CircleCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { can, useUsuario } from '../../lib/auth';
 import { useStore, actions } from '../../lib/store';
 import { money, fechaCorta, idFmt, iniciales } from '../../lib/format';
 import { PLAZOS } from '../../lib/finanzas';
@@ -19,6 +20,7 @@ function Detalle({ a, onClose }) {
   const docs = a.docs || ['DNI (frente y dorso)', 'Recibo de sueldo', 'Comprobante de domicilio'];
   const rows = [
     ['Monto solicitado', money(a.monto)], ['Plazo', `${a.plazo} cuotas`], ['Score', a.score], ['Estado', ESTADO_LBL[a.estado]],
+    ...(a.por ? [[a.estado === 'desembolsado' ? 'Desembolsado por' : 'Decidido por', a.por]] : []),
     ...(a.numero ? [['N.º de solicitud', a.numero]] : []),
     ...(a.dni ? [['DNI', a.dni], ['Email', a.email], ['Celular', a.tel], ['Domicilio', a.domicilio], ['Situación laboral', a.laboral], ['Ingreso neto', money(a.ingreso)], ['Destino', a.destino], ['Cuota estimada', money(a.cuota)]] : []),
   ];
@@ -56,6 +58,9 @@ function Nueva({ onClose }) {
 
 export default function Solicitudes() {
   const { solicitudes } = useStore();
+  const user = useUsuario();
+  const puedeDecidir = can(user, 'decidir');
+  const puedeVerificar = can(user, 'verificacion');
   const [f, setF] = useState('todas');
   const [q, setQ] = useState('');
   const [ver, setVer] = useState(null);
@@ -93,8 +98,8 @@ export default function Solicitudes() {
                   <td>{money(a.monto)}</td><td>{a.score}</td><td>{fechaCorta(a.fecha)}</td><td><EstadoPill estado={a.estado} /></td>
                   <td className="r actions">
                     <Button size="sm" variant="ghost" onClick={() => setVer(a.id)}><Eye size={14} /> Ver</Button>
-                    {a.estado === 'pendiente' && <><Button size="sm" variant="ok" onClick={() => aprobar(a)}><Check size={14} /> Aprobar</Button><Button size="sm" variant="bad" onClick={() => rechazar(a)}><X size={14} /> Rechazar</Button></>}
-                    {a.estado === 'aprobado' && <Button size="sm" variant="light" to="/admin/verificacion"><Fingerprint size={14} /> Verificar</Button>}
+                    {a.estado === 'pendiente' && puedeDecidir && <><Button size="sm" variant="ok" onClick={() => aprobar(a)}><Check size={14} /> Aprobar</Button><Button size="sm" variant="bad" onClick={() => rechazar(a)}><X size={14} /> Rechazar</Button></>}
+                    {a.estado === 'aprobado' && puedeVerificar && <Button size="sm" variant="light" to="/admin/verificacion"><Fingerprint size={14} /> Verificar</Button>}
                   </td>
                 </tr>
               ))}

@@ -27,3 +27,13 @@ export const fechaCorta = (iso) => {
   }
 };
 export const idFmt = (id) => '#' + String(id).padStart(4, '0');
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
+/** "hace 2 días" a partir de una fecha ISO con hora. */
+export const tiempo = (iso) => {
+  try {
+    return formatDistanceToNow(parseISO(iso), { locale: es, addSuffix: true });
+  } catch {
+    return '';
+  }
+};

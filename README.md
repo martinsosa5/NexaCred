@@ -8,7 +8,8 @@ Este repo es el sitio de NexaCred (portal público + panel de administración). 
 
 **Parte pública** (`/`): presentación de la empresa, simulador de préstamo (cuota, total, TNA y CFT, cronograma), nosotros, cómo funciona, requisitos, preguntas y contacto. `/solicitud` permite pedir el préstamo en 4 pasos con carga de documentación. `/manual` describe los módulos del sistema.
 
-**Parte privada** (`/admin`, solo personal de la entidad): panel general, solicitudes, scoring de riesgo, verificación presencial con firma, y cartera y cobranzas. Usuario: `admin@nexacred.com` / `demo1234`.
+**Parte privada** (`/admin`, solo personal de la entidad): panel general, solicitudes, scoring de riesgo, verificación presencial con firma, y cartera y cobranzas. Hay un administrador general (`admin@nexacred.com` / `demo1234`) que, además, ve el módulo **Empleados**: ahí crea empleados con correo y contraseña y les habilita áreas (panel, solicitudes, aprobar/rechazar, scoring, verificación y firma, cartera). Cada empleado solo ve las áreas asignadas y la actividad queda firmada con su nombre. Empleados de ejemplo: `lucia@`, `julian@` y `carolina@nexacred.com` / `empleado123`.
+El ingreso tiene "¿Olvidaste tu contraseña?": el envío del código es simulado (cualquier código de 6 dígitos sirve) y la contraseña nueva sí se guarda.
 
 Los datos son de ejemplo y se guardan en el `localStorage` del navegador (sin backend). Una solicitud cargada en `/solicitud` aparece en el admin, en el mismo navegador.
 

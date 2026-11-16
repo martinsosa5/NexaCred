@@ -5,25 +5,43 @@
    (incluso entre pestañas). En el sistema real esto es la API + PostgreSQL.
    ========================================================= */
 import { useSyncExternalStore } from 'react';
-import { format } from 'date-fns';
+import { addDays, format, subDays, subHours } from 'date-fns';
 import { calcular, scoreInicial } from './finanzas';
 
-const KEY = 'nexacred-demo-v2';
+const KEY = 'nexacred-demo-v3';
+
+const d = (n) => format(addDays(new Date(), n), 'yyyy-MM-dd');
+const ago = (h) => subHours(new Date(), h).toISOString();
+const TODOS = ['panel', 'solicitudes', 'decidir', 'scoring', 'verificacion', 'cartera'];
 
 const seed = () => ({
-  nextId: 8,
+  nextId: 13,
+  nextEmp: 5,
+  empleados: [
+    { id: 1, nombre: 'Admin NexaCred', email: 'admin@nexacred.com', password: 'demo1234', rol: 'Administrador general', permisos: TODOS, admin: true, activo: true },
+    { id: 2, nombre: 'Lucía Paredes', email: 'lucia@nexacred.com', password: 'empleado123', rol: 'Oficial de crédito', permisos: ['panel', 'solicitudes', 'decidir', 'scoring'], activo: true },
+    { id: 3, nombre: 'Julián Roldán', email: 'julian@nexacred.com', password: 'empleado123', rol: 'Oficial de sucursal', permisos: ['solicitudes', 'verificacion'], activo: true },
+    { id: 4, nombre: 'Carolina Vega', email: 'carolina@nexacred.com', password: 'empleado123', rol: 'Analista de cobranzas', permisos: ['panel', 'cartera'], activo: true },
+  ],
   solicitudes: [
-    { id: 1, cliente: 'Mariana Fernández', monto: 450000, plazo: 24, score: 712, fecha: '2026-08-02', estado: 'aprobado' },
-    { id: 2, cliente: 'Comercial Rioja S.A.', monto: 1200000, plazo: 36, score: 640, fecha: '2026-08-04', estado: 'pendiente' },
-    { id: 3, cliente: 'Lucas Gómez', monto: 280000, plazo: 12, score: 588, fecha: '2026-08-05', estado: 'rechazado' },
-    { id: 4, cliente: 'Norma Aguirre', monto: 860000, plazo: 24, score: 701, fecha: '2026-07-20', estado: 'desembolsado', saldo: 540000, estadoPago: 'al_dia', proximoVencimiento: '2026-09-15', terminosAceptados: true },
-    { id: 5, cliente: 'Distribuidora Sur SRL', monto: 2100000, plazo: 36, score: 655, fecha: '2026-08-07', estado: 'pendiente' },
-    { id: 6, cliente: 'J. Pérez', monto: 320000, plazo: 12, score: 615, fecha: '2026-06-10', estado: 'desembolsado', saldo: 198000, estadoPago: 'atrasado', proximoVencimiento: '2026-08-28', terminosAceptados: true },
-    { id: 7, cliente: 'L. Ibáñez', monto: 500000, plazo: 24, score: 690, fecha: '2026-07-02', estado: 'desembolsado', saldo: 410000, estadoPago: 'al_dia', proximoVencimiento: '2026-09-18', terminosAceptados: true },
+    { id: 1, cliente: 'Mariana Fernández', monto: 450000, plazo: 24, score: 712, fecha: d(-3), estado: 'aprobado', por: 'Lucía Paredes' },
+    { id: 2, cliente: 'Comercial Rioja S.A.', monto: 1200000, plazo: 36, score: 640, fecha: d(-2), estado: 'pendiente' },
+    { id: 3, cliente: 'Lucas Gómez', monto: 280000, plazo: 12, score: 588, fecha: d(-2), estado: 'rechazado', por: 'Lucía Paredes' },
+    { id: 4, cliente: 'Norma Aguirre', monto: 860000, plazo: 24, score: 701, fecha: d(-120), estado: 'desembolsado', saldo: 540000, estadoPago: 'al_dia', proximoVencimiento: d(9), terminosAceptados: true },
+    { id: 5, cliente: 'Distribuidora Sur SRL', monto: 2100000, plazo: 36, score: 655, fecha: d(-1), estado: 'pendiente' },
+    { id: 6, cliente: 'J. Pérez', monto: 320000, plazo: 12, score: 615, fecha: d(-170), estado: 'desembolsado', saldo: 198000, estadoPago: 'atrasado', proximoVencimiento: d(-35), terminosAceptados: true },
+    { id: 7, cliente: 'L. Ibáñez', monto: 500000, plazo: 24, score: 690, fecha: d(-140), estado: 'desembolsado', saldo: 410000, estadoPago: 'al_dia', proximoVencimiento: d(12), terminosAceptados: true },
+    { id: 8, cliente: 'Ana Quiroga', monto: 650000, plazo: 24, score: 735, fecha: d(-90), estado: 'desembolsado', saldo: 520000, estadoPago: 'al_dia', proximoVencimiento: d(5), terminosAceptados: true },
+    { id: 9, cliente: 'Ricardo Salas', monto: 400000, plazo: 18, score: 668, fecha: d(-60), estado: 'desembolsado', saldo: 350000, estadoPago: 'al_dia', proximoVencimiento: d(18), terminosAceptados: true },
+    { id: 10, cliente: 'Panadería Los Andes', monto: 1500000, plazo: 36, score: 720, fecha: d(-200), estado: 'desembolsado', saldo: 1100000, estadoPago: 'al_dia', proximoVencimiento: d(3), terminosAceptados: true },
+    { id: 11, cliente: 'Silvia Medina', monto: 250000, plazo: 12, score: 602, fecha: d(-100), estado: 'desembolsado', saldo: 160000, estadoPago: 'atrasado', proximoVencimiento: d(-9), terminosAceptados: true },
+    { id: 12, cliente: 'Carlos Díaz', monto: 700000, plazo: 24, score: 698, fecha: d(-75), estado: 'desembolsado', saldo: 610000, estadoPago: 'al_dia', proximoVencimiento: d(22), terminosAceptados: true },
   ],
   actividad: [
-    { icon: 'bell', text: 'Recordatorio de pago enviado a J. Pérez', t: 'Hace 2 días' },
-    { icon: 'file-signature', text: 'Plan de pago propuesto a M. López', t: 'Hace 1 día' },
+    { icon: 'thumbs-up', text: 'Solicitud de Mariana Fernández aprobada, pendiente de verificación presencial', at: ago(20), by: 'Lucía Paredes' },
+    { icon: 'bell', text: 'Recordatorio de pago enviado a Silvia Medina', at: ago(30), by: 'Carolina Vega' },
+    { icon: 'thumbs-down', text: 'Solicitud de Lucas Gómez rechazada', at: ago(44), by: 'Lucía Paredes' },
+    { icon: 'circle-check', text: 'Crédito desembolsado a Carlos Díaz: términos aceptados y firma confirmada', at: ago(24 * 75), by: 'Julián Roldán' },
   ],
 });
 
@@ -69,8 +87,13 @@ const subscribe = (cb) => {
 export const useStore = () => useSyncExternalStore(subscribe, () => state);
 
 const hoy = () => format(new Date(), 'yyyy-MM-dd');
-const log = (s, icon, text) => ({ ...s, actividad: [{ icon, text, t: 'Ahora' }, ...s.actividad].slice(0, 8) });
+let actorFn = () => '';
+/** auth.js registra quién tiene la sesión abierta, para firmar cada acción en la actividad. */
+export const registrarActor = (fn) => { actorFn = fn; };
+export const getState = () => state;
+const log = (s, icon, text, by) => ({ ...s, actividad: [{ icon, text, at: new Date().toISOString(), by: by ?? (actorFn() || 'Sistema') }, ...s.actividad].slice(0, 40) });
 const patch = (id, fields) => (s) => ({ ...s, solicitudes: s.solicitudes.map((a) => (a.id === id ? { ...a, ...fields } : a)) });
+const quien = () => actorFn() || undefined;
 const find = (id) => state.solicitudes.find((a) => a.id === id);
 
 export const actions = {
@@ -101,7 +124,7 @@ export const actions = {
       origen: 'portal',
     };
     let next = { ...state, nextId: id + 1, solicitudes: [...state.solicitudes, sol] };
-    next = log(next, 'file-circle-plus', `Nueva solicitud online: ${sol.cliente} (${numero})`);
+    next = log(next, 'file-circle-plus', `Nueva solicitud online: ${sol.cliente} (${numero})`, 'Portal público');
     set(next);
     return sol;
   },
@@ -119,12 +142,12 @@ export const actions = {
   aprobar(id) {
     const a = find(id);
     if (!a) return;
-    set(log(patch(id, { estado: 'aprobado' })(state), 'thumbs-up', `Solicitud de ${a.cliente} aprobada, pendiente de verificación presencial`));
+    set(log(patch(id, { estado: 'aprobado', por: quien() })(state), 'thumbs-up', `Solicitud de ${a.cliente} aprobada, pendiente de verificación presencial`));
   },
   rechazar(id) {
     const a = find(id);
     if (!a) return;
-    set(log(patch(id, { estado: 'rechazado' })(state), 'thumbs-down', `Solicitud de ${a.cliente} rechazada`));
+    set(log(patch(id, { estado: 'rechazado', por: quien() })(state), 'thumbs-down', `Solicitud de ${a.cliente} rechazada`));
   },
   recalcularScore(id) {
     const a = find(id);
@@ -141,6 +164,7 @@ export const actions = {
     venc.setDate(venc.getDate() + 30);
     const s = patch(id, {
       estado: 'desembolsado',
+      por: quien(),
       saldo: a.monto,
       estadoPago: 'al_dia',
       terminosAceptados: true,
@@ -155,7 +179,35 @@ export const actions = {
     set(log(state, 'bell', `Recordatorio de pago enviado a ${a.cliente}`));
   },
   consulta({ nombre }) {
-    set(log(state, 'message-circle', `Nueva consulta desde el sitio: ${nombre}`));
+    set(log(state, 'message-circle', `Nueva consulta desde el sitio: ${nombre}`, 'Portal público'));
+  },
+  /* ---- Empleados (solo administrador general) ---- */
+  crearEmpleado({ nombre, email, password, rol, permisos }) {
+    const id = state.nextEmp;
+    const emp = { id, nombre: nombre.trim(), email: email.trim().toLowerCase(), password, rol, permisos, activo: true };
+    set(log({ ...state, nextEmp: id + 1, empleados: [...state.empleados, emp] }, 'user-plus', `Nuevo empleado creado: ${emp.nombre} (${rol})`));
+    return emp;
+  },
+  actualizarEmpleado(id, campos) {
+    const e = state.empleados.find((x) => x.id === id);
+    if (!e) return;
+    const limpio = { ...campos };
+    if (!limpio.password) delete limpio.password;
+    const next = { ...state, empleados: state.empleados.map((x) => (x.id === id ? { ...x, ...limpio } : x)) };
+    set(log(next, 'user-cog', `Accesos actualizados para ${e.nombre}`));
+  },
+  estadoEmpleado(id, activo) {
+    const e = state.empleados.find((x) => x.id === id);
+    if (!e || e.admin) return;
+    const next = { ...state, empleados: state.empleados.map((x) => (x.id === id ? { ...x, activo } : x)) };
+    set(log(next, activo ? 'user-plus' : 'user-x', `${e.nombre} ${activo ? 'fue reactivado' : 'fue dado de baja'}`));
+  },
+  /** Recuperación de contraseña (la verificación por código es simulada). */
+  cambiarPassword(email, password) {
+    const e = state.empleados.find((x) => x.email === email.trim().toLowerCase());
+    if (!e) return false;
+    set({ ...state, empleados: state.empleados.map((x) => (x.id === e.id ? { ...x, password } : x)) });
+    return true;
   },
   reiniciar() {
     set(seed());

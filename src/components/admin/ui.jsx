@@ -1,8 +1,8 @@
-import { Bell, FilePlus, FileSignature, ThumbsUp, ThumbsDown, RefreshCw, CircleCheck, MessageCircle, Activity } from 'lucide-react';
+import { Bell, FilePlus, FileSignature, ThumbsUp, ThumbsDown, RefreshCw, CircleCheck, MessageCircle, Activity, UserPlus, UserCog, UserX } from 'lucide-react';
 
 const ICONS = {
   bell: Bell, 'file-circle-plus': FilePlus, 'file-signature': FileSignature, 'thumbs-up': ThumbsUp,
-  'thumbs-down': ThumbsDown, rotate: RefreshCw, 'circle-check': CircleCheck, 'message-circle': MessageCircle,
+  'thumbs-down': ThumbsDown, rotate: RefreshCw, 'circle-check': CircleCheck, 'message-circle': MessageCircle, 'user-plus': UserPlus, 'user-cog': UserCog, 'user-x': UserX,
 };
 export const ActIcon = ({ name, size = 16 }) => {
   const I = ICONS[name] || Activity;
@@ -16,8 +16,8 @@ export function EstadoPill({ estado }) {
   }[estado];
   return <span className={`pill ${m[0]}`}>{m[1]}</span>;
 }
-export const PagoPill = ({ estado }) =>
-  estado === 'atrasado' ? <span className="pill pill-bad">Atrasado</span> : <span className="pill pill-ok">Al día</span>;
+export const PagoPill = ({ estado, dias }) =>
+  estado === 'atrasado' ? <span className="pill pill-bad">Atrasado{dias ? ` · ${dias} d` : ''}</span> : <span className="pill pill-ok">Al día</span>;
 
 export function Empty({ icon: I, children }) {
   return (

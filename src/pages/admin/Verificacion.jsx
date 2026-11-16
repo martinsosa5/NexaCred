@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
-import { ClipboardCheck } from 'lucide-react';
+import { ClipboardCheck, Search } from 'lucide-react';
 import { useStore, actions } from '../../lib/store';
 import { money } from '../../lib/format';
 import FirmaPad from '../../components/admin/FirmaPad';
@@ -10,7 +10,9 @@ import { Empty } from '../../components/admin/ui';
 
 export default function Verificacion() {
   const { solicitudes } = useStore();
-  const aprobadas = solicitudes.filter((a) => a.estado === 'aprobado');
+  const todas = solicitudes.filter((a) => a.estado === 'aprobado');
+  const [q, setQ] = useState('');
+  const aprobadas = todas.filter((a) => a.cliente.toLowerCase().includes(q.trim().toLowerCase()));
   const [sel, setSel] = useState(null);
   const a = aprobadas.find((x) => x.id === Number(sel)) || aprobadas[0];
   const [docs, setDocs] = useState(false);
@@ -30,18 +32,29 @@ export default function Verificacion() {
     setSel(null);
   };
 
-  if (!a) {
+  if (!todas.length) {
     return <div className="card"><Empty icon={ClipboardCheck}>No hay créditos aprobados esperando verificación en este momento.</Empty></div>;
   }
   const done = [docs, bio, terms, firma].filter(Boolean).length;
-  return (
-    <div className="card narrow-card" key={a.id}>
+  const selector = (
+    <>
+      <div className="field" style={{ marginBottom: 12 }}>
+        <label htmlFor="vq">Buscar cliente</label>
+        <div className="search full"><Search size={16} /><input id="vq" className="input" placeholder="Nombre del cliente" value={q} onChange={(e) => setQ(e.target.value)} /></div>
+      </div>
       <div className="field" style={{ marginBottom: 20 }}>
         <label htmlFor="vs">Solicitud aprobada</label>
-        <select id="vs" className="select" value={a.id} onChange={(e) => { setSel(e.target.value); reset(); }}>
+        <select id="vs" className="select" value={a?.id ?? ''} onChange={(e) => { setSel(e.target.value); reset(); }} disabled={!a}>
           {aprobadas.map((x) => <option key={x.id} value={x.id}>{x.cliente} · {money(x.monto)}</option>)}
         </select>
+        {!a && <span className="err">No hay clientes aprobados con ese nombre.</span>}
       </div>
+    </>
+  );
+  if (!a) return <div className="card narrow-card">{selector}</div>;
+  return (
+    <div className="card narrow-card" key={a.id}>
+      {selector}
       <div className="branch-head"><span><strong>Sucursal Centro</strong> · Turno 10:30 hs</span><span>Cliente: {a.cliente}</span></div>
       <div className="progress" aria-label={`${done} de 4 pasos completos`}><span style={{ width: done * 25 + '%' }} /></div>
       <ul className="checklist">

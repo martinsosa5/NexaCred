@@ -81,3 +81,52 @@ export function scoreInicial({ cuota, ingreso, laboral, dni }) {
   s += Number(String(dni || '0').slice(-2)) % 37;
   return Math.max(300, Math.min(990, Math.round(s)));
 }
+
+/** Escala del score y sus bandas de riesgo (la usa la pantalla de Scoring). */
+export const ESCALA = {
+  min: 300,
+  max: 990,
+  bandas: [
+    { key: 'alto', label: 'Riesgo alto', desde: 300, hasta: 599, accion: 'Revisión manual antes de aprobar; en general se rechaza.' },
+    { key: 'medio', label: 'Riesgo medio', desde: 600, hasta: 699, accion: 'Se puede aprobar con garantías adicionales o una tasa ajustada.' },
+    { key: 'bajo', label: 'Riesgo bajo', desde: 700, hasta: 990, accion: 'Se aprueba con la tasa estándar.' },
+  ],
+};
+
+/** Cómo se arma el puntaje: reglas de esta versión del sistema. */
+export const REGLAS_SCORE = [
+  { nombre: 'Puntaje base', detalle: 'Todo solicitante parte de 600 puntos.', pts: '600' },
+  { nombre: 'Relación cuota / ingreso', detalle: 'Cuota hasta 20% del ingreso: +110 · hasta 30%: +80 · hasta 35%: +40 · más de 35%: −20.', pts: '−20 a +110' },
+  { nombre: 'Situación laboral', detalle: 'Relación de dependencia: +40 · jubilado o pensionado: +20 · monotributista o autónomo: +10.', pts: '0 a +40' },
+  { nombre: 'Consulta a buró de crédito', detalle: 'Ajuste de 0 a +36 según el comportamiento de pago en el sistema financiero. En esta versión la consulta está simulada.', pts: '0 a +36' },
+];
+
+/** Factores que se muestran para una solicitud. Usa los datos reales cuando existen; si no, los estima desde el puntaje. */
+export function factoresSolicitud(a) {
+  const real = a.ingreso > 0 && a.cuota > 0;
+  const ratio = real ? a.cuota / a.ingreso : a.score >= 650 ? 0.28 : 0.41;
+  const rPts = ratio <= 0.2 ? 110 : ratio <= 0.3 ? 80 : ratio <= RATIO_MAX ? 40 : -20;
+  const lab = a.laboral || (a.score >= 700 ? 'Empleado en relación de dependencia' : 'Monotributista o autónomo');
+  const lPts = { 'Empleado en relación de dependencia': 40, 'Jubilado o pensionado': 20, 'Monotributista o autónomo': 10 }[lab] ?? 0;
+  const buro = a.score >= 600;
+  return [
+    {
+      nombre: 'Relación cuota / ingreso',
+      valor: Math.round(ratio * 100) + '%' + (real ? '' : ' (estimado)'),
+      nota: `La cuota representa ese porcentaje del ingreso mensual. El máximo recomendado es ${Math.round(RATIO_MAX * 100)}%.`,
+      nivel: rPts >= 80 ? 'ok' : rPts > 0 ? 'neutro' : 'mal',
+    },
+    {
+      nombre: 'Situación laboral',
+      valor: lab + (a.laboral ? '' : ' (estimado)'),
+      nota: 'Una fuente de ingresos estable y comprobable reduce el riesgo.',
+      nivel: lPts >= 40 ? 'ok' : lPts > 0 ? 'neutro' : 'mal',
+    },
+    {
+      nombre: 'Buró de crédito',
+      valor: buro ? 'Sin deudas activas' : 'Deudas menores registradas',
+      nota: 'Comportamiento de pago del solicitante en el resto del sistema financiero (consulta simulada).',
+      nivel: buro ? 'ok' : 'mal',
+    },
+  ];
+}

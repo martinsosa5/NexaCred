@@ -32,6 +32,7 @@ export default function Login() {
           <label htmlFor="p">Contraseña</label>
           <input id="p" className="input" type="password" autoComplete="current-password" value={p} onChange={(e) => { setP(e.target.value); setErr(''); }} />
         </div>
+        <Link to="/admin/recuperar" className="link-btn forgot">¿Olvidaste tu contraseña?</Link>
         <span className="err" role="alert">{err}</span>
         <Button type="submit" className="btn-block">Ingresar</Button>
       </form>
