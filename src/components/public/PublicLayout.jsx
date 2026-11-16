@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Menu, X, MessageCircle, MapPin, Phone, Mail, Clock } from 'lucide-react';
 import Logo from '../ui/Logo';
 import Button from '../ui/Button';
+import Chatbot from './Chatbot';
 import { SimProvider } from '../../context/SimContext';
 
 const NAV = [
@@ -111,6 +112,7 @@ export default function PublicLayout() {
         <MessageCircle size={26} />
         <span className="wa-tip">Comunicate con nosotros</span>
       </a>
+      <Chatbot />
     </SimProvider>
   );
 }
