@@ -97,7 +97,7 @@ export default function Simulador() {
                   ))}
                 </div>
               </fieldset>
-              <p className="fine">Sistema francés, cuota fija. Las tasas son ficticias y la simulación no es una oferta firme.</p>
+              <p className="fine">Sistema francés, cuota fija. Las tasas son orientativas y la simulación no es una oferta firme.</p>
             </div>
           </Reveal>
 

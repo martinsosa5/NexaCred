@@ -50,7 +50,7 @@ export default function Manual() {
                 <span className="chip">Uso: {tab.who}</span>
                 <h2 className="t-lg" style={{ margin: '18px 0 12px' }}>{tab.label}</h2>
                 <p className="t-sub">{tab.desc}</p>
-                <div style={{ marginTop: 28 }}><Button to={tab.to} arrow>Abrir en la demo</Button></div>
+                <div style={{ marginTop: 28 }}><Button to={tab.to} arrow>Abrir módulo</Button></div>
               </div>
               <div className="col-lg-6">
                 <div className="can-card">
@@ -60,7 +60,6 @@ export default function Manual() {
               </div>
             </div>
           </div>
-          <Reveal className="demo-note-box"><p>Esta es una demostración: los nombres, montos y datos que ves son de ejemplo.</p></Reveal>
         </div>
       </section>
     </>

@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Check, ArrowUp, IdCard, FileText, Home, Upload, CircleCheck, TriangleAlert, ShieldCheck } from 'lucide-react';
+import { Check, ArrowUp, IdCard, FileText, Home, Upload, CircleCheck, TriangleAlert } from 'lucide-react';
 import { useSim } from '../context/SimContext';
 import { datosSchema, LABORAL, DESTINOS, DOCS, MAX_BYTES, OK_EXT } from '../lib/schemas';
 import { actions } from '../lib/store';
@@ -107,11 +107,6 @@ export default function Solicitud() {
           <div className="bring-box">
             <h2>Qué llevar a la sucursal</h2>
             <ul><li>DNI original</li><li>Último recibo de sueldo o comprobante de ingresos</li><li>Comprobante de domicilio a tu nombre</li></ul>
-          </div>
-          <div className="demo-box">
-            <ShieldCheck size={20} />
-            <p><strong>Demo del stand:</strong> tu solicitud ya está cargada en el panel de administración, lista para revisar, aprobar y desembolsar.</p>
-            <Button to="/admin" variant="dark" size="sm" arrow>Verla en el panel</Button>
           </div>
           <div className="hero-btns" style={{ marginTop: 32 }}>
             <Button to="/" variant="ghost">Volver al inicio</Button>
@@ -218,7 +213,6 @@ export default function Solicitud() {
             </div>
           )}
         </form>
-        <p className="fine" style={{ marginTop: 20 }}>Sitio demostrativo: lo que cargues se guarda solo en este navegador y no se envía a ningún servidor.</p>
       </div>
     </section>
   );

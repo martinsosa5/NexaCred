@@ -3,7 +3,7 @@ import { Navigate, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import Logo from '../../components/ui/Logo';
 import Button from '../../components/ui/Button';
-import { isAuth, login, DEMO_USER, DEMO_PASS } from '../../lib/auth';
+import { isAuth, login } from '../../lib/auth';
 
 export default function Login() {
   const nav = useNavigate();
@@ -16,10 +16,6 @@ export default function Login() {
     e.preventDefault();
     if (login(u, p)) nav('/admin', { replace: true });
     else setErr('Usuario o contraseña incorrectos.');
-  };
-  const demo = () => {
-    login(DEMO_USER, DEMO_PASS);
-    nav('/admin', { replace: true });
   };
   return (
     <div className="login page">
@@ -38,9 +34,6 @@ export default function Login() {
         </div>
         <span className="err" role="alert">{err}</span>
         <Button type="submit" className="btn-block">Ingresar</Button>
-        <div className="login-sep"><span>o</span></div>
-        <Button type="button" variant="ghost" className="btn-block" onClick={demo}>Entrar como demo</Button>
-        <p className="fine">Demo: <b>{DEMO_USER}</b> · <b>{DEMO_PASS}</b>. Los datos son de ejemplo y se guardan solo en este navegador.</p>
       </form>
     </div>
   );

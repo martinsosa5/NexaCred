@@ -62,7 +62,7 @@ export default function Panel() {
           </ul>
         </div>
       </div>
-      <p className="fine" style={{ marginTop: 16 }}>Cartera activa: {money(cartera)} · Mora: {pct(mora, 1)}. Datos de ejemplo.</p>
+      <p className="fine" style={{ marginTop: 16 }}>Cartera activa: {money(cartera)} · Mora: {pct(mora, 1)}.</p>
     </>
   );
 }

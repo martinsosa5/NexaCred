@@ -2,20 +2,15 @@
 
 Proyecto académico (Administración de Sistemas, UTN FRT): **NexaCred S.R.L.**, empresa ficticia que desarrolla un sistema SaaS de gestión de préstamos para financieras y prestamistas. NexaCred no presta dinero: vende el software a quien presta.
 
-Este repo es el **prototipo navegable** para la demo. No tiene backend: los datos son de ejemplo y se guardan en el `localStorage` del navegador.
+Este repo es el sitio de NexaCred (portal público + panel de administración). No tiene backend: los datos son de ejemplo y se guardan en el `localStorage` del navegador.
 
 ## Qué incluye
 
-**Parte pública** (`/`)
-- Home con simulador de préstamo (cuota, total, TNA y CFT, cronograma), nosotros, cómo funciona, requisitos, preguntas y contacto.
-- `/solicitud`: pedido de préstamo en 4 pasos con carga de documentación.
-- `/empresas`: presentación para financieras (cliente de NexaCred).
-- `/manual`: manual del sistema por módulos.
+**Parte pública** (`/`): presentación de la empresa, simulador de préstamo (cuota, total, TNA y CFT, cronograma), nosotros, cómo funciona, requisitos, preguntas y contacto. `/solicitud` permite pedir el préstamo en 4 pasos con carga de documentación. `/manual` describe los módulos del sistema.
 
-**Parte privada** (`/admin`)
-- Panel general, solicitudes, scoring de riesgo, verificación presencial con firma, cartera y cobranzas.
-- Usuario demo: `admin@nexacred.com` / `demo1234` (también hay un botón "Entrar como demo").
-- Una solicitud cargada en `/solicitud` aparece en el admin (mismo navegador). Botón **Reiniciar demo** en el menú lateral para volver a los datos de ejemplo.
+**Parte privada** (`/admin`, solo personal de la entidad): panel general, solicitudes, scoring de riesgo, verificación presencial con firma, y cartera y cobranzas. Usuario: `admin@nexacred.com` / `demo1234`.
+
+Los datos son de ejemplo y se guardan en el `localStorage` del navegador (sin backend). Una solicitud cargada en `/solicitud` aparece en el admin, en el mismo navegador.
 
 ## Cómo correrlo
 
@@ -32,7 +27,7 @@ npm run preview   # sirve dist/
 src/
   lib/          finanzas.js (cálculo francés, CFT, scoring), store.js (datos demo), schemas.js (Zod), auth.js, format.js
   components/   ui/ (Reveal, Split, Modal, Button…), public/ (layout, simulador), admin/
-  pages/        Home, Solicitud, Empresas, Manual, admin/*
+  pages/        Home, Solicitud, Manual, admin/*
   styles/       tokens.css (colores, radios), base.css, ui.css, public.css, admin.css
 public/         favicon e img/portada.jpg (foto del hero)
 prototipo/      primeros prototipos HTML (referencia, no se usan en el sitio)
@@ -54,4 +49,4 @@ Stack: React 19 + Vite, React Router, React Hook Form + Zod, react-hot-toast, lu
 - Cambiar la foto del hero: reemplazar `public/img/portada.jpg` (conviene 1920 px de ancho o más).
 - Cambiar tasas o límites del simulador: `src/lib/finanzas.js`.
 
-> Todo es ficticio y con fines académicos. Las tasas no constituyen una oferta.
+> Proyecto académico (UTN FRT, Administración de Sistemas). Las tasas no constituyen una oferta.

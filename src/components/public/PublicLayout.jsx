@@ -52,7 +52,6 @@ export default function PublicLayout() {
             {NAV.map((n) => (
               <Link key={n.to} to={n.to}>{n.label}</Link>
             ))}
-            <NavLink to="/empresas">Para empresas</NavLink>
             <Button to="/solicitud" size="sm" className="nav-cta-m">Solicitar préstamo</Button>
           </nav>
           <div className="nav-actions">
@@ -87,7 +86,6 @@ export default function PublicLayout() {
             <div className="col-6 col-lg-2">
               <h4>Producto</h4>
               <ul>
-                <li><Link to="/empresas">Para empresas</Link></li>
                 <li><Link to="/manual">Manual del sistema</Link></li>
                 <li><Link to="/admin">Panel de administración</Link></li>
               </ul>
@@ -103,8 +101,8 @@ export default function PublicLayout() {
             </div>
           </div>
           <div className="foot-legal">
-            <span>© 2026 NexaCred S.R.L. · Proyecto académico, UTN FRT · Administración de Sistemas.</span>
-            <span>Sitio demostrativo: tasas y condiciones ficticias. Lo que cargues no se envía a ningún servidor.</span>
+            <span>© 2026 NexaCred S.R.L. Todos los derechos reservados.</span>
+            <span>Las tasas y condiciones son orientativas y están sujetas a evaluación crediticia y aprobación.</span>
           </div>
         </div>
       </footer>

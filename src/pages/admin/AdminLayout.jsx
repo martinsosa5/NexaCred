@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import { NavLink, Navigate, Outlet, useLocation, useNavigate, Link } from 'react-router-dom';
-import { LayoutDashboard, FileStack, ScanSearch, Fingerprint, Wallet, Menu, Globe, RotateCcw, LogOut } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { LayoutDashboard, FileStack, ScanSearch, Fingerprint, Wallet, Menu, Globe, LogOut } from 'lucide-react';
 import Logo from '../../components/ui/Logo';
 import { isAuth, logout } from '../../lib/auth';
-import { useStore, actions } from '../../lib/store';
+import { useStore } from '../../lib/store';
 
 const TITLES = { '/admin': 'Panel general', '/admin/solicitudes': 'Solicitudes de crédito', '/admin/scoring': 'Scoring de riesgo', '/admin/verificacion': 'Verificación presencial y firma', '/admin/cartera': 'Cartera y cobranzas' };
 
@@ -26,10 +25,6 @@ export default function AdminLayout() {
     { to: '/admin/verificacion', icon: Fingerprint, label: 'Verificación y firma', badge: aprob },
     { to: '/admin/cartera', icon: Wallet, label: 'Cartera y cobranzas' },
   ];
-  const reset = () => {
-    actions.reiniciar();
-    toast.success('Demo reiniciada: datos de ejemplo restaurados.');
-  };
   const salir = () => { logout(); nav('/admin/login'); };
 
   return (
@@ -46,7 +41,6 @@ export default function AdminLayout() {
         </nav>
         <div className="side-foot">
           <Link to="/" className="side-link"><Globe size={18} /> Ver sitio público</Link>
-          <button className="side-link" onClick={reset}><RotateCcw size={18} /> Reiniciar demo</button>
           <button className="side-link" onClick={salir}><LogOut size={18} /> Salir</button>
         </div>
       </aside>
