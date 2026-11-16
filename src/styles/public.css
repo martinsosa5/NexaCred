@@ -192,3 +192,9 @@
 .can-card { background: #fff; border: 1px solid var(--concrete); border-radius: var(--r-card); padding: 28px; }
 .can-card li { display: flex; gap: 10px; padding: 8px 0; color: var(--steel); }
 .demo-note-box { margin-top: 20px; padding: 18px 22px; border-radius: 14px; background: var(--blue-soft); font-size: .92rem; }
+
+/* Texto sobre la foto: siempre blanco y con overlay más oscuro para que se lea */
+.photo-band::after { background: linear-gradient(180deg, rgba(8,14,26,.72), rgba(8,14,26,.62)); }
+.photo-band .eyebrow, .photo-band .t-sub, .photo-band .t-xl { color: #fff; text-shadow: 0 2px 18px rgba(0,0,0,.45); }
+.photo-band .t-sub { max-width: 640px; margin: 24px auto 0; font-size: 1.1rem; }
+.photo-band .eyebrow { margin-bottom: 16px; opacity: .9; }
