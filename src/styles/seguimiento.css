@@ -1,0 +1,26 @@
+.seg-pagina { background: var(--chalk); padding-top: 56px; }
+.seg-titulo { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+.seg-titulo h1 { font-size: clamp(2.3rem, 6vw, 4rem); }
+.seg-demo { display: flex; gap: 12px; margin: 24px 0; padding: 18px; border-radius: 12px; background: var(--blue-soft); color: var(--info); font-size: .85rem; }
+.seg-demo svg { flex: none; margin-top: 3px; }
+.seg-form { display: flex; flex-direction: column; gap: 20px; }
+.seg-form .btn { align-self: flex-start; }
+.seg-error { margin-top: 20px; padding: 18px; border: 1px solid var(--bad); border-radius: 12px; color: var(--bad); background: var(--bad-bg); }
+.seg-resultado { display: flex; flex-direction: column; align-items: flex-start; gap: 18px; margin-top: 24px; }
+.seg-resultado h2 { font-size: 1.4rem; overflow-wrap: anywhere; max-width: 100%; }
+.seg-resultado h3 { font-size: 1.1rem; }
+.seg-fechas { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; font-size: .88rem; margin: 0; }
+.seg-fechas dt { color: var(--steel); }
+.seg-fechas dd { margin: 0; }
+.seg-linea { width: 100%; }
+.seg-linea li { display: flex; gap: 14px; position: relative; padding-bottom: 24px; }
+.seg-linea li:last-child { padding-bottom: 0; }
+.seg-linea li:not(:last-child)::after { content: ''; position: absolute; left: 15px; top: 32px; bottom: 0; width: 2px; background: var(--concrete); }
+.seg-paso { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; flex: none; background: var(--blue-soft); color: var(--blue); }
+.seg-linea .pendiente .seg-paso { color: var(--steel); background: var(--chalk); }
+.seg-linea small { display: block; color: var(--steel); margin-top: 4px; font-size: .78rem; }
+.seg-credenciales { padding: 24px; margin-top: 24px; border: 1px solid var(--concrete); border-radius: 16px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.seg-credenciales h2 { font-size: 1.1rem; }
+.seg-credenciales code { display: block; font-size: 1.1rem; letter-spacing: .03em; color: var(--blue-dark); overflow-wrap: anywhere; max-width: 100%; user-select: all; }
+.seg-credenciales .btn { white-space: normal; }
+@media (max-width: 600px) { .seg-fechas { grid-template-columns: 1fr; gap: 5px; } .seg-fechas dd { margin-bottom: 10px; } }

@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom';
 import PublicLayout from './components/public/PublicLayout';
 import Home from './pages/Home';
 import Solicitud from './pages/Solicitud';
+import Seguimiento from './pages/Seguimiento';
 import Manual from './pages/Manual';
 import Login from './pages/admin/Login';
 import AdminLayout from './pages/admin/AdminLayout';
@@ -19,6 +20,7 @@ export default function App() {
       <Route element={<PublicLayout />}>
         <Route index element={<Home />} />
         <Route path="solicitud" element={<Solicitud />} />
+        <Route path="seguimiento" element={<Seguimiento />} />
         <Route path="manual" element={<Manual />} />
         <Route path="*" element={<Home />} />
       </Route>

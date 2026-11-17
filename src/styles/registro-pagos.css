@@ -1,0 +1,10 @@
+.pago-form { display: flex; flex-direction: column; gap: 18px; }
+.pago-campos { display: grid; gap: 14px; border: 0; padding: 0; margin: 0; min-width: 0; }
+.pago-acepta { display: flex; align-items: flex-start; gap: 10px; font-size: .85rem; }
+.pago-acepta input { margin-top: 4px; flex: none; accent-color: var(--blue); }
+.pago-botones { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.pago-resumen { display: block; font-size: .74rem; color: var(--steel); margin-top: 5px; white-space: normal; }
+.pago-acciones { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.pago-operaciones { margin-top: 16px; font-size: .85rem; }
+.pago-operaciones li { border-bottom: 1px solid var(--concrete); padding: 10px 0; }
+.pago-operaciones small { display: block; color: var(--steel); }

@@ -1,0 +1,41 @@
+.cob-contenedor, .cob-calendario { min-width: 0; }
+.cob-resumen { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.cob-resumen > div { background: var(--chalk); padding: 12px; border-radius: 10px; }
+.cob-resumen strong, .cob-resumen span { display: block; }
+.cob-resumen strong { font-size: 1.6rem; font-variant-numeric: tabular-nums; }
+.cob-resumen span, .cob-nota { font-size: .78rem; color: var(--steel); }
+.cob-nota { margin-top: 14px; }
+.cob-navegacion { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin: 24px 0 16px; }
+.cob-navegacion h2 { font-size: 1.1rem; text-transform: capitalize; }
+.cob-navegacion > div { display: flex; align-items: center; gap: 6px; }
+.cob-leyenda { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: .72rem; margin-bottom: 16px; }
+.cob-calendario .atrasado { --cob-color: var(--bad); --cob-bg: var(--bad-bg); }
+.cob-calendario .pagada { --cob-color: var(--ok); --cob-bg: var(--ok-bg); }
+.cob-calendario .pendiente { --cob-color: var(--info); --cob-bg: var(--info-bg); }
+.cob-calendario .sin-datos { --cob-color: var(--steel); --cob-bg: var(--chalk); }
+.cob-leyenda li::before { content: ''; display: inline-block; width: 8px; height: 8px; margin-right: 5px; border-radius: 50%; background: var(--cob-color); }
+.cob-scroll { overflow-x: auto; border: 1px solid var(--concrete); border-radius: 10px; }
+.cob-grilla { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); min-width: 560px; gap: 1px; background: var(--concrete); }
+.cob-semana { background: var(--graphite); color: var(--paper); padding: 10px 4px; text-align: center; font-size: .75rem; }
+.cob-dia { min-width: 0; min-height: 112px; padding: 6px; background: var(--paper); }
+.cob-fuera { background: var(--chalk); }
+.cob-dia time { display: grid; place-items: center; width: 28px; height: 28px; margin-bottom: 6px; font-size: .8rem; }
+.cob-fuera time { color: var(--steel); }
+.cob-dia time[aria-current="date"] { background: var(--blue); color: var(--paper); border-radius: 50%; font-weight: 600; }
+.cob-evento { display: block; width: 100%; text-align: left; border: 0; border-left: 3px solid var(--cob-color); border-radius: 5px; background: var(--cob-bg); color: var(--cob-color); padding: 6px; margin-bottom: 5px; cursor: pointer; overflow-wrap: anywhere; }
+.cob-evento strong { display: block; font-size: .72rem; font-weight: 600; }
+.cob-evento small { display: block; font-size: .65rem; }
+.cob-evento:hover { box-shadow: inset 0 0 0 1px var(--cob-color); }
+.cob-sin-fecha { margin-top: 18px; }
+.cob-sin-fecha h3 { font-size: .9rem; margin-bottom: 10px; }
+.cob-detalle { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: .9rem; }
+.cob-detalle dt { color: var(--steel); }
+.cob-detalle dd { margin: 0; overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  .cob-calendario { padding: 14px; }
+  .cob-resumen { gap: 6px; }
+  .cob-resumen > div { padding: 8px; }
+  .cob-resumen span { font-size: .68rem; }
+  .cob-detalle { grid-template-columns: 1fr; gap: 5px; }
+  .cob-detalle dd { margin-bottom: 10px; }
+}
