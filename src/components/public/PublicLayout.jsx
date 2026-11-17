@@ -12,6 +12,7 @@ const NAV = [
   { to: '/#como-funciona', label: 'Cómo funciona' },
   { to: '/#requisitos', label: 'Requisitos' },
   { to: '/#preguntas', label: 'Preguntas' },
+  { to: '/seguimiento', label: 'Consultar mi solicitud' },
 ];
 
 function ScrollManager() {
@@ -82,6 +83,7 @@ export default function PublicLayout() {
                 <li><Link to="/#como-funciona">Cómo funciona</Link></li>
                 <li><Link to="/#requisitos">Requisitos</Link></li>
                 <li><Link to="/solicitud">Solicitar</Link></li>
+                <li><Link to="/seguimiento">Consultar mi solicitud</Link></li>
               </ul>
             </div>
             <div className="col-6 col-lg-2">

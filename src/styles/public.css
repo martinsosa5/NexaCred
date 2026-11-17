@@ -3,14 +3,15 @@
 .site-nav.scrolled { border-color: var(--concrete); }
 .nav-inner { height: var(--nav-h); display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 .logo { display: inline-flex; align-items: center; gap: 10px; font-weight: 600; letter-spacing: -0.03em; font-size: 1.15rem; }
-.logo svg { flex: none; }
+.logo .logo-mark { flex: none; display: block; object-fit: contain; }
+.logo-text { white-space: nowrap; font-weight: 500; }
 .nav-links { display: flex; gap: 4px; }
 .nav-links a { padding: 8px 14px; border-radius: var(--r-pill); font-size: .9rem; font-weight: 500; transition: background .2s; }
 .nav-links a:hover, .nav-links a.active { background: var(--chalk); }
 .nav-actions { display: flex; align-items: center; gap: 8px; }
 .nav-cta { padding: 10px 20px; font-size: .88rem; }
 .nav-burger, .nav-cta-m { display: none; }
-@media (max-width: 991px) {
+@media (max-width: 1199px) {
   .nav-burger { display: grid; }
   .nav-cta { display: none; }
   .nav-links { position: fixed; inset: var(--nav-h) 0 auto 0; flex-direction: column; background: #fff; padding: 12px 16px 24px; gap: 0; border-bottom: 1px solid var(--concrete); transform: translateY(-12px); opacity: 0; pointer-events: none; transition: .3s var(--ease); }

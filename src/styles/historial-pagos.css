@@ -1,0 +1,29 @@
+.hist-ficha { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.hist-ficha h3 { font-size: 1rem; margin-bottom: 12px; }
+.hist-cliente { display: flex; align-items: center; gap: 12px; }
+.hist-cliente svg { flex: none; color: var(--blue); }
+.hist-cliente h2 { font-size: 1.2rem; overflow-wrap: anywhere; }
+.hist-cliente p, .hist-nota { font-size: .78rem; color: var(--steel); }
+.hist-nota { display: block; margin-top: 5px; white-space: normal; }
+.hist-datos { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 10px 16px; margin: 0; font-size: .87rem; }
+.hist-datos dt { color: var(--steel); }
+.hist-datos dd { margin: 0; overflow-wrap: anywhere; }
+.hist-resumen { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.hist-resumen > div { background: var(--chalk); padding: 14px; border-radius: 12px; }
+.hist-resumen span { display: block; font-size: .75rem; color: var(--steel); }
+.hist-resumen strong { display: block; margin-top: 5px; font-size: 1.2rem; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.hist-filtros { margin: 12px 0; }
+.hist-tabla { border: 1px solid var(--concrete); border-radius: 12px; }
+.hist-detalle { border: 1px solid var(--concrete); border-radius: 12px; padding: 16px; }
+.hist-operacion { list-style: none; padding: 16px 0; border-bottom: 1px solid var(--concrete); }
+.hist-operacion h4 { font-size: .95rem; margin-bottom: 12px; }
+.hist-operacion:last-child { border-bottom: 0; }
+.hist-movimiento { border-bottom: 1px solid var(--concrete); padding: 12px 0; }
+.hist-movimiento summary { cursor: pointer; font-size: .86rem; overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  .hist-resumen { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hist-resumen > div { padding: 10px; }
+  .hist-resumen strong { font-size: 1rem; }
+  .hist-datos { grid-template-columns: minmax(0, 1fr); gap: 5px; }
+  .hist-datos dd { margin-bottom: 8px; }
+}

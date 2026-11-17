@@ -9,6 +9,7 @@ import { actions } from '../lib/store';
 import { RATIO_MAX } from '../lib/finanzas';
 import { money, pct, digits, num } from '../lib/format';
 import Button from '../components/ui/Button';
+import '../styles/seguimiento.css';
 
 const DOC_ICON = { dniFrente: IdCard, dniDorso: IdCard, ingresos: FileText, domicilio: Home };
 const STEPS = ['Tu préstamo', 'Tus datos', 'Documentación', 'Confirmar'];
@@ -99,6 +100,13 @@ export default function Solicitud() {
           <div className="success-check"><Check size={36} strokeWidth={3} /></div>
           <h1 className="t-xl">Recibimos tu solicitud.</h1>
           <p className="t-sub">Tu número de solicitud es <strong className="req-number num">{done.numero}</strong>. Guardalo por si necesitás consultarnos.</p>
+          <div className="seg-credenciales">
+            <h2>Código privado de consulta</h2>
+            <code>{done.codigoConsulta}</code>
+            <p>Guardá el número de solicitud y este código privado. Necesitás ambos para consultar el estado. No compartas el código.</p>
+            <p className="fine">Demostración local: la consulta funciona solo en este navegador y origen. No es un mecanismo de seguridad para producción.</p>
+            <Button to="/seguimiento">Consultar estado de mi solicitud</Button>
+          </div>
           <ol className="next-steps">
             <li><span>1</span><div><strong>Analizamos tu pedido</strong><p>En hasta 48 horas hábiles revisamos tus datos y tu documentación.</p></div></li>
             <li><span>2</span><div><strong>Te avisamos</strong><p>Si tiene el visto bueno, te escribimos a <b>{done.email}</b> y por WhatsApp.</p></div></li>

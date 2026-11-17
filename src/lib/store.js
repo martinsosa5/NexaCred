@@ -7,6 +7,8 @@
 import { useSyncExternalStore } from 'react';
 import { addDays, format, subDays, subHours } from 'date-fns';
 import { calcular, scoreInicial } from './finanzas';
+import { aplicarPago } from './pagos';
+import { generarCodigoConsulta, registrarCambioSeguimiento } from './seguimiento';
 
 const KEY = 'nexacred-demo-v3';
 
@@ -97,15 +99,41 @@ const quien = () => actorFn() || undefined;
 const find = (id) => state.solicitudes.find((a) => a.id === id);
 
 export const actions = {
+  /** Una escritura persistente bajo bloqueo evita perder pagos entre pestañas. */
+  async registrarPago(datos) {
+    if (!navigator.locks) throw new Error('El navegador no permite registrar pagos de forma segura. Usá una versión actual de Chrome, Edge o Firefox en localhost.');
+    return navigator.locks.request('nexacred-registro-pagos', () => {
+      let actual;
+      try {
+        const raw = localStorage.getItem(KEY);
+        actual = raw ? JSON.parse(raw) : state;
+      } catch { throw new Error('No se pudieron leer los datos guardados. No se registró el pago.'); }
+      const empleadoId = Number(sessionStorage.getItem('nexacred-admin-session'));
+      const empleado = actual.empleados.find((e) => e.id === empleadoId);
+      let next = aplicarPago(actual, datos, empleado);
+      next = log(next, 'circle-check', `Pago registrado de ${actual.solicitudes.find((a) => a.id === datos.creditoId).cliente}: $ ${datos.importe.toFixed(2)}`, empleado.nombre);
+      try { localStorage.setItem(KEY, JSON.stringify(next)); }
+      catch { throw new Error('No se pudo guardar el pago en el navegador. No se modificó el saldo.'); }
+      state = next;
+      listeners.forEach((l) => l());
+      return next.pagos.find((p) => p.id === datos.id);
+    });
+  },
   /** Alta desde el portal público (RF-04 a RF-06). */
   crearDesdePortal({ datos, docs, monto, plazo }) {
     const c = calcular(monto, plazo);
     const ingreso = Number(String(datos.ingreso).replace(/\D/g, '')) || 0;
     const id = state.nextId;
     const numero = `NC-${new Date().getFullYear()}-${String(id).padStart(5, '0')}`;
+    let codigoConsulta;
+    do { codigoConsulta = generarCodigoConsulta(); } while (state.solicitudes.some((a) => a.codigoConsulta === codigoConsulta));
+    const creadaEn = new Date().toISOString();
     const sol = {
       id,
       numero,
+      codigoConsulta,
+      actualizadaEn: creadaEn,
+      seguimientoEventos: [{ estado: 'pendiente', fecha: creadaEn }],
       cliente: datos.nombre.trim(),
       dni: datos.dni,
       email: datos.email.trim(),
@@ -142,12 +170,12 @@ export const actions = {
   aprobar(id) {
     const a = find(id);
     if (!a) return;
-    set(log(patch(id, { estado: 'aprobado', por: quien() })(state), 'thumbs-up', `Solicitud de ${a.cliente} aprobada, pendiente de verificación presencial`));
+    set(log(patch(id, { estado: 'aprobado', por: quien(), ...registrarCambioSeguimiento(a, 'aprobado') })(state), 'thumbs-up', `Solicitud de ${a.cliente} aprobada, pendiente de verificación presencial`));
   },
   rechazar(id) {
     const a = find(id);
     if (!a) return;
-    set(log(patch(id, { estado: 'rechazado', por: quien() })(state), 'thumbs-down', `Solicitud de ${a.cliente} rechazada`));
+    set(log(patch(id, { estado: 'rechazado', por: quien(), ...registrarCambioSeguimiento(a, 'rechazado') })(state), 'thumbs-down', `Solicitud de ${a.cliente} rechazada`));
   },
   recalcularScore(id) {
     const a = find(id);
@@ -164,12 +192,15 @@ export const actions = {
     venc.setDate(venc.getDate() + 30);
     const s = patch(id, {
       estado: 'desembolsado',
+      ...registrarCambioSeguimiento(a, 'desembolsado'),
       por: quien(),
       saldo: a.monto,
       estadoPago: 'al_dia',
       terminosAceptados: true,
       firma,
       proximoVencimiento: format(venc, 'yyyy-MM-dd'),
+      planPagos: { siguiente: 1 },
+      cuota: Math.round(calcular(a.monto, a.plazo).cuota * 100) / 100,
     })(state);
     set(log(s, 'circle-check', `Crédito desembolsado a ${a.cliente}: términos aceptados y firma confirmada`));
   },
